@@ -1,0 +1,205 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<style>
+    /* Add this for search bar styling */
+    .search-container {
+        text-align: center;
+        margin-bottom: 20px; /* Space between search and table */
+    }
+
+    .search-container input[type="text"] {
+        padding: 8px 12px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        width: 300px; /* Adjust width as needed */
+        font-size: 15px;
+        margin-right: 8px;
+    }
+
+    .search-container button {
+        padding: 8px 18px;
+        background-color: #007bff; /* A nice blue for search */
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 15px;
+        transition: background-color 0.2s;
+    }
+
+    .search-container button:hover {
+        background-color: #0056b3;
+    }
+
+    /* Keep your existing styles */
+    .role-btn {
+        padding:8px 18px;
+        border:none;
+        border-radius:4px;
+        margin:0 8px 20px 8px;
+        cursor:pointer;
+        font-weight: 500;
+        font-size: 15px;
+        transition: box-shadow 0.2s;
+    }
+    .role-btn-customer { background: #76a6d5; color: #fff; }
+    .role-btn-author { background: #ff7043; color: #fff; }
+    .role-btn-seller { background: #c66fd7; color: #fff; }
+    .role-btn-all { background: #150255; color: #fff; }
+    .role-btn.selected { box-shadow: 0 0 6px 2px #90caf9; }
+    .user-table { width:100%; border-collapse:collapse; }
+    .user-table th, .user-table td { padding:10px; text-align:left; }
+    .user-table th { background:#f5f5f5; }
+    .user-table tr { border-bottom:1px solid #eee; }
+    .user-table tr:last-child { border-bottom:none; }
+    .status-btn {
+        padding: 6px 16px;
+        border: none;
+        border-radius: 4px;
+        font-size: 14px;
+        font-weight: 500;
+        cursor: pointer;
+        margin: 4px 0;
+    }
+    .suspend-btn { background: #930704; color: #fff; }
+    .activate-btn { background: #086f0e; color: #fff; }
+    .approve-btn { background: #1976d2; color: #fff; }
+    .pending-label { color: #1b061f; font-weight: bold; }
+    .view-btn { background: #2196F3; color: #fff; border: none; border-radius: 4px; padding: 6px 16px; font-size: 14px; font-weight: 500; cursor: pointer; }
+
+    /* Flash message styles */
+    .flash-success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; padding: 10px; border-radius: 5px; margin-bottom: 10px; text-align: center; }
+    .flash-danger { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; padding: 10px; border-radius: 5px; margin-bottom: 10px; text-align: center; }
+    .flash-warning { background-color: #fff3cd; color: #856404; border: 1px solid #ffeeba; padding: 10px; border-radius: 5px; margin-bottom: 10px; text-align: center; }
+
+</style>
+<div class="browse-section" style="max-width:1000px; margin:40px auto; background:rgba(255,255,255,0.9); padding:30px; border-radius:12px;">
+    
+    {% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    <ul style="list-style:none; padding:0;">
+      {% for category, message in messages %}
+        {% if category == 'success' %}
+          <li class="flash-success">{{ message }}</li>
+        {% elif category == 'danger' %}
+          <li class="flash-danger">{{ message }}</li>
+        {% else %}
+          <li class="flash-warning">{{ message }}</li>
+        {% endif %}
+      {% endfor %}
+    </ul>
+  {% endif %}
+{% endwith %}
+
+
+    <h2 style="text-align:center; color:#2d3e50;">Manage Users</h2>
+    <div style="text-align:center;">
+        <a href="{{ url_for('admin_dashboard', role='customer') }}">
+            <button class="role-btn role-btn-customer{% if filter_role == 'customer' %} selected{% endif %}">Customer</button></a>
+        <a href="{{ url_for('admin_dashboard', role='author') }}">
+            <button class="role-btn role-btn-author{% if filter_role == 'author' %} selected{% endif %}">Author</button></a>
+        <a href="{{ url_for('admin_dashboard', role='seller') }}">
+            <button class="role-btn role-btn-seller{% if filter_role == 'seller' %} selected{% endif %}">Seller</button></a>
+        <a href="{{ url_for('admin_dashboard') }}">
+            <button class="role-btn role-btn-all{% if not filter_role or filter_role == 'all' %} selected{% endif %}">DISPLAY ALL</button></a>
+    </div>
+
+    <!-- Search Bar START -->
+    <div class="search-container">
+        <form method="GET" action="{{ url_for('admin_dashboard') }}">
+            <input type="text" name="search_query" placeholder="Search by name or email..." value="{{ search_query | default('') }}">
+            <button type="submit">Search Users</button>
+            {% if filter_role %}
+                <input type="hidden" name="role" value="{{ filter_role }}">
+            {% endif %}
+        </form>
+    </div>
+    <!-- Search Bar END -->
+
+    <table class="user-table">
+        <thead>
+            <tr>
+                <th>Users</th>
+                <th>Role</th>
+                <th>Status</th>
+                <th>Action</th>
+                <th>View Details</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for user in users %}
+            <tr>
+                <td>
+                    {{ user['first_name'] }} {{ user['last_name'] }}<br>
+                    <span style="font-size:12px; color:#888;">{{ user['email'] }}</span>
+                </td>
+                <td style="text-transform:capitalize;">{{ user['role'] }}</td>
+                <td>
+                    {% if user['role'] == 'seller' %}
+                        {% set seller_status = user.get('status', 'pending') %}
+                        {% if seller_status in ['pending', 'not_approved'] %}
+                            <span class="pending-label">Pending Approval</span>
+                        {% elif seller_status == 'active' %}
+                            <span style="color:#388e3c; font-weight:bold;">Active</span>
+                        {% elif seller_status == 'suspended' %}
+                            <span style="color:#e53935; font-weight:bold;">Suspended</span>
+                        {% endif %}
+                    {% else %}
+                        {% set user_status = user.get('status', 'active') %}
+                        {% if user_status == 'active' %}
+                            <span style="color:#388e3c; font-weight:bold;">Active</span>
+                        {% else %}
+                            <span style="color:#e53935; font-weight:bold;">Suspended</span>
+                        {% endif %}
+                    {% endif %}
+                </td>
+                <td>
+                    {% if user['role'] == 'seller' %}
+                        {% set seller_status = user.get('status', 'pending') %}
+                        {% if seller_status in ['pending', 'not_approved'] %}
+                                <a href="{{ url_for('admin_approve_seller', user_id=user['_id']) }}">
+                                    <button class="status-btn approve-btn">VIEW APPLICATION</button>
+                                </a>
+                        {% elif seller_status == 'active' %}
+                            <form method="POST" action="{{ url_for('admin_user_status', user_id=user['_id']) }}" style="display:inline;">
+                                <input type="hidden" name="new_status" value="suspended">
+                                <button type="submit" class="status-btn suspend-btn">SUSPEND</button>
+                            </form>
+                        {% elif seller_status == 'suspended' %}
+                            <form method="POST" action="{{ url_for('admin_user_status', user_id=user['_id']) }}" style="display:inline;">
+                                <input type="hidden" name="new_status" value="active">
+                                <button type="submit" class="status-btn activate-btn">ACTIVATE</button>
+                            </form>
+                        {% endif %}
+                    {% else %}
+                        {% set user_status = user.get('status', 'active') %}
+                        {% if user_status == 'active' %}
+                            <form method="POST" action="{{ url_for('admin_user_status', user_id=user['_id']) }}" style="display:inline;">
+                                <input type="hidden" name="new_status" value="suspended">
+                                <button type="submit" class="status-btn suspend-btn">SUSPEND</button>
+                            </form>
+                        {% else %}
+                            <form method="POST" action="{{ url_for('admin_user_status', user_id=user['_id']) }}" style="display:inline;">
+                                <input type="hidden" name="new_status" value="active">
+                                <button type="submit" class="status-btn activate-btn">ACTIVATE</button>
+                            </form>
+                        {% endif %}
+                    {% endif %}
+                </td>
+                <td>
+                    <a href="{{ url_for('admin_view_user', user_id=user['_id']) }}">
+                        <button class="view-btn">VIEW DETAILS</button>
+                    </a>
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="5" style="text-align:center; color:#888; padding:20px;">No users found for this role.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block content %}
+<style>
+    h1{
+        font-weight: bold; 
+        text-shadow:#1976d2 1px 1px 5px;
+        text-align:center; 
+        color:#1e015e; 
+        margin-bottom: 20px;
+    }
+    button[type="button"]:hover {
+        filter: brightness(1.50);
+        color:black;
+    }
+    button[type="button"] {
+        display: inline-block;
+        background-color: #1976d2;
+        color: white;
+        padding: 10px 24px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer; 
+        transition: background 0.2s;
+        margin-left: 45%; 
+    }
+</style>
+
+<div style="max-width: 600px; margin: 40px auto; background: #fff; padding: 36px 32px; border-radius: 12px; box-shadow: 0 2px 16px #e3e3e3;">
+    <h1>Thank You!</h1>
+    <p style="font-size: 17px; color: #444; margin-bottom: 28px;">
+        Thank you, <b>{{ name }}</b>, for your interest in becoming a seller on ShelfSpace.
+        Our team will review your application and contact you soon.
+        You will receive an email at <b>{{ email }}</b> with further instructions once your account is approved.<br>
+        <a href="{{ url_for('home') }}" class="btn-OK"><button type="button">OK</button></a>
+    </p>
+</div>
+{% endblock %}

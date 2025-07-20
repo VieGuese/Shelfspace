@@ -1,0 +1,140 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<style>
+    p{
+        font-size: 18px; 
+        color: #333;
+    }
+    h1{
+        font-weight: bold; 
+        text-shadow:#1976d2 1px 1px 5px;
+        text-align:center; 
+        color:#1e015e; 
+        margin-bottom: 20px;
+    }
+    h2{ 
+        color:#1976d2; 
+        margin-top: 32px;
+    } 
+    .manage-section {
+        max-width: 1100px;
+        margin: 40px auto;
+        background: #fff;
+        padding: 36px 32px;
+        border-radius: 12px;
+        box-shadow: 0 2px 16px #e3e3e3;
+    }
+    .search-bar {
+        width: 100%;
+        max-width: 400px;
+        padding: 10px 16px;
+        border: 1px solid #bbb;
+        border-radius: 6px;
+        font-size: 16px;
+        margin-bottom: 26px;
+    }
+    .book-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 10px;
+    }
+    .book-table th, .book-table td {
+        padding: 12px 8px;
+        text-align: left;
+        border-bottom: 1px solid #eee;
+    }
+    .book-table th {
+        background: #f5f5f5;
+        font-size: 16px;
+        font-weight: 600;
+        color: #222;
+    }
+    .book-table img {
+        width: 60px;
+        height: 80px;
+        object-fit: cover;
+        border-radius: 4px;
+        box-shadow: 0 1px 4px #ddd;
+    }
+    .edit-btn {
+        background: #1976d2;
+        color: #fff;
+        border: none;
+        border-radius: 5px;
+        padding: 8px 18px;
+        font-size: 15px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+    .edit-btn:hover {
+        background: #004ba0;
+    }
+    @media (max-width: 700px) {
+        .book-table th, .book-table td { font-size: 13px; padding: 8px 4px; }
+        .book-table img { width: 40px; height: 54px; }
+    }
+</style>
+
+<div class="manage-section">
+    <h1>Manage My Listings</h1>
+    <div style="display: flex; justify-content: center; align-items: center; gap: 16px; margin-bottom: 18px;">
+        <form method="GET" style="margin:0;">
+            <input class="search-bar" type="text" name="search" placeholder="Search by title or author..." value="{{ search_term|default('') }}">
+        </form>
+        <a href="{{ url_for('add_book') }}">
+            <button type="button" style="background:#43a047; color:#fff; padding:10px 24px; border:none; border-radius:6px; font-size:16px; font-weight:bold; cursor:pointer;">
+                ADD BOOK
+            </button>
+        </a>
+    </div>
+<table class="book-table">
+    <thead>
+        <tr>
+            <th>Thumbnail</th>
+            <th>Book Title</th>
+            <th>Author</th>
+            <th>Categories</th>
+            <th>Price</th>
+            <th>In Stock</th>
+            <th>Edit</th>
+        </tr>
+    </thead>
+    <tbody>
+    {% for book in books %}
+        <tr>
+            <td>
+                {% if book.thumbnail_url %}
+                    <img src="{{ book.thumbnail_url }}" alt="Thumbnail">
+                {% else %}
+                    <div style="width:60px; height:80px; background:#eee; border-radius:4px; display:flex; align-items:center; justify-content:center; color:#bbb; font-size:13px;">
+                        No Image
+                    </div>
+                {% endif %}
+            </td>
+            <td>{{ book.title }}</td>
+            <td>{{ book.author }}</td>
+            <td>
+                {% if book.categories %}
+                    {{ book.categories | join(', ') }}
+                {% else %}
+                    <span style="color:#aaa;">None</span>
+                {% endif %}
+            </td>
+            <td>${{ "%.2f"|format(book.price) }}</td>
+            <td>{{ book.in_stock }}</td>
+            <td> 
+            </td>
+        </tr>
+    {% else %}
+        <tr>
+            <td colspan="7" style="text-align:center; color:#888; padding:20px;">No listings found.</td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+
+</div>
+{% endblock %}

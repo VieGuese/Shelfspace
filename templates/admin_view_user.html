@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div style="max-width: 500px; margin: 40px auto; background: #fff; padding: 36px 32px; border-radius: 12px; box-shadow: 0 2px 16px #e3e3e3;">
+    <h2 style="color:#1976d2; text-align:center;">User Details</h2>
+    <form method="POST" action="{{ url_for('admin_update_user', user_id=user['_id']) }}">
+        <div style="margin-bottom:16px;">
+            <label style="font-weight:bold;">Full Name</label><br>
+            <input type="text" name="first_name" value="{{ user['first_name'] }}" style="width:48%;margin-right:4%;padding:8px;" required>
+            <input type="text" name="last_name" value="{{ user['last_name'] }}" style="width:48%;padding:8px;" required>
+        </div>
+        <div style="margin-bottom:16px;">
+            <label style="font-weight:bold;">Email Address</label><br>
+            <input type="email" value="{{ user['email'] }}" readonly style="width:100%;padding:8px;background:#f3f3f3;">
+        </div>
+        <div style="margin-bottom:16px;">
+            <label style="font-weight:bold;">Username</label><br>
+            <input type="text" value="{{ user.get('username', '') }}" readonly style="width:100%;padding:8px;background:#f3f3f3;">
+        </div>
+        <div style="margin-bottom:16px;">
+            <label style="font-weight:bold;">Role</label><br>
+            <input type="email" value="{{ user['role'] }}" readonly style="width:100%;padding:8px;background:#f3f3f3;">
+        </div>
+        <div style="text-align:center;">
+            <button type="submit" style="background:#43a047; color:#fff; padding:10px 28px; border:none; border-radius:6px; font-size:16px; font-weight:bold; cursor:pointer;">
+                SAVE
+            </button>
+            <a href="{{ url_for('admin_dashboard') }}" style="margin-left:18px; background:#888; color:#fff; padding:10px 28px; border:none; border-radius:6px; font-size:16px; font-weight:bold; text-decoration:none;">
+                CANCEL
+            </a>
+        </div>
+    </form>
+    <form method="POST" action="{{ url_for('delete_user', user_id=user['_id']) }}">
+        <label for="reason" style="font-weight:bold;">Reason for Deleting User Account:</label><br>
+        <textarea name="reason" id="reason" required style="width:100%;padding:8px;margin-bottom:12px;"></textarea>
+        <button type="submit" style="background:#b71c1c; color:#fff; padding:10px 28px; border:none; border-radius:6px; font-size:16px; font-weight:bold; cursor:pointer;">
+            DELETE
+        </button>
+    </form>
+</div>
+{% endblock %}

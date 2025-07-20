@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block content %}
+{% if user.get('status') == 'not_approved' and user.get('disapproval_reason') %}
+    <div style="color:#e53935; margin-top:12px;">
+        <strong>Disapproval Reason:</strong> {{ user['disapproval_reason'] }}
+    </div>
+{% endif %}
+
+<div style="max-width: 500px; margin: 40px auto; background: #fff; padding: 36px 32px; border-radius: 12px; box-shadow: 0 2px 16px #e3e3e3;">
+    <h2 style="color:#1976d2; text-align:center;">User Details</h2>
+    <div style="margin-bottom:16px;">
+        <strong>Full Name:</strong> {{ user['first_name'] }} {{ user['last_name'] }}
+    </div>
+    <div style="margin-bottom:16px;">
+        <strong>Email Address:</strong> {{ user['email'] }}
+    </div>
+    <div style="margin-bottom:16px;">
+        <strong>Username:</strong> {{ user.get('username', '') }}
+    </div>
+    <div style="margin-bottom:16px;">
+        <strong>Role:</strong> {{ user['role'] }}
+    </div>
+    <!-- Add UPDATE and DELETE buttons as needed -->
+    <form method="POST" action="{{ url_for('admin_update_user', user_id=user['_id']) }}" style="display:inline;">
+        <!-- Add your update fields here -->
+        <button type="submit" class="status-btn activate-btn">UPDATE</button>
+    </form>
+    <form method="POST" action="{{ url_for('delete_user', user_id=user['_id']) }}" style="display:inline;" onsubmit="return confirm('Are you sure you want to delete this user?');">
+        <button type="submit" class="status-btn suspend-btn">DELETE</button>
+    </form>
+</div>
+{% endblock %}

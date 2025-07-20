@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% block content %}
+
+<style>
+    p{
+        font-size: 18px; 
+        color: #333;
+    }
+    h1{
+        font-weight: bold; 
+        text-shadow:#1976d2 1px 1px 5px;
+        text-align:center; 
+        color:#1e015e; 
+        margin-bottom: 20px;
+    }
+    h2{ 
+        color:#1976d2; 
+        margin-top: 32px;
+        }
+    .ClickMe a{
+        display: inline-block;
+        margin-top: 10px; 
+        background: #1976d2; 
+        color: #fff; 
+        padding: 10px 22px; 
+        border-radius: 5px; 
+        text-decoration: none; 
+        font-weight: bold;
+    }
+    .ClickMe a:hover {
+        filter: brightness(1.50);
+        color:black;
+    } 
+</style>
+<div style="max-width: 500px; margin: 40px auto; background: #fff; padding: 36px 32px; border-radius: 12px;">
+    <h1>Add a New Book</h1>
+<form method="POST" enctype="multipart/form-data">
+    <label>Thumbnail Image</label><br>
+    <input type="file" name="thumbnail" accept="image/*" required style="margin-bottom:14px;"><br>
+    <label>Book Title</label><br>
+    <input type="text" name="title" required style="width:100%;padding:8px;margin-bottom:14px;"><br>
+    <label>Author(s)</label><br>
+    <input type="text" name="author" required style="width:100%;padding:8px;margin-bottom:14px;"><br>
+    <label>Categories</label><br>
+        <div style="max-height: 180px; overflow-y: auto; border: 1px solid #ccc; padding: 10px; border-radius: 6px; margin-bottom: 14px;">
+            {% set categories = [
+                'Fiction', 'Non-Fiction', 'Science Fiction', 'Fantasy', 'Mystery', 'Thriller',
+                'Romance', 'Biography', 'History', 'Science', 'Children’s', 'Young Adult',
+                'Self-Help', 'Business', 'Health & Wellness', 'Religion & Spirituality',
+                'Travel', 'Art & Photography', 'Comics & Graphic Novels', 'Cookbooks'
+            ] %}
+            {% for cat in categories %}
+                <label style="display:block; margin-bottom:6px;">
+                    <input type="checkbox" name="categories" value="{{ cat }}"> {{ cat }}
+                </label>
+            {% endfor %}
+        </div>
+
+    <label>Price</label><br>
+    <input type="number" name="price" step="0.01" required style="width:100%;padding:8px;margin-bottom:14px;"><br>
+    <label>In Stock</label><br>
+    <input type="number" name="in_stock" min="0" required style="width:100%;padding:8px;margin-bottom:18px;"><br>
+    <button type="submit" style="background:#1976d2; color:#fff; padding:10px 28px; border:none; border-radius:6px; font-size:16px; font-weight:bold; cursor:pointer;">
+        Add Book
+    </button>
+</form>
+
+</div>
+{% endblock %}

@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+
+{% block content %}
+<style>
+    .ContactUs {
+        max-width: 600px; 
+        margin: 40px auto; 
+        background: rgba(255,255,255,0.98); 
+        padding: 36px 32px; 
+        border-radius: 12px; 
+        box-shadow: 0 2px 16px #e3e3e3;
+    }
+    .ContactUs h1{
+        font-weight: bold; 
+        text-shadow:#1976d2 1px 1px 5px;
+        text-align:center; 
+        color:#1e015e; 
+        margin-bottom: 20px;
+    } 
+    .seller{
+        background: hsl(292, 72%, 92%); 
+        border-radius: 8px; 
+        padding: 24px; 
+        text-align: center;
+    }
+    .seller h2 {
+        color: #770688;
+    }
+    .seller button {
+        background: #cc77e0; 
+        color: #fff; 
+        padding: 10px 28px; 
+        border: none; 
+        border-radius: 5px; 
+        font-size: 16px; 
+        font-weight: bold; 
+        margin-top: 10px; 
+        cursor: pointer;
+    }
+    .seller button:hover {
+        filter: brightness(1.50);
+        color:black;
+    }
+
+    .author{
+        background: #fff3e0; 
+        border-radius: 8px; 
+        padding: 24px; 
+        text-align: center;
+    }
+    .author h2 {
+        color: #ff7043;
+    }
+    .author button {
+        background: #ff7043; 
+        color: #fff; 
+        padding: 10px 28px; 
+        border: none; 
+        border-radius: 5px; 
+        font-size: 16px; 
+        font-weight: bold; 
+        margin-top: 10px; 
+        cursor: pointer;
+    }      
+    .author button:hover {
+        filter: brightness(1.50);
+        color:black;
+    } 
+</style>
+
+<div class="ContactUs">
+    <h1>Contact Us</h1>
+    <p style="font-size: 18px; color: #333; text-align: center;">
+        Are you interested in selling books or sharing your work as an author on ShelfSpace? Choose your path below to get started!
+    </p>
+    
+    <div style="display: flex; flex-direction: column; gap: 28px; margin-top: 36px;">
+        <div class="seller">
+            <h2>I Am a Seller</h2>
+            <p style="font-size: 16px; color: #444;">
+                Have a book you bought and no longer need? List your gently used books on ShelfSpace and connect with readers looking for a great deal!
+            </p>
+            <a href="{{ url_for('contact_seller') }}">
+                <button>CLICK ME IF YOU ARE A SELLER</button>
+            </a>
+        </div>
+
+        <div class="author">
+            <h2>I Am an Author</h2>
+            <p style="font-size: 16px; color: #444;">
+                Are you a writer looking to reach new readers? Share your books with our community and grow your audience on ShelfSpace!
+            </p>
+            <a href="{{ url_for('contact_author') }}">
+                <button>CLICK ME IF YOU ARE AN AUTHOR</button>
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

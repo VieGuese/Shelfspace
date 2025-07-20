@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+{% block content %}
+
+<style>
+    p{
+        font-size: 18px; 
+        color: #333;
+    }
+    h1{
+        font-weight: bold; 
+        text-shadow:#1976d2 1px 1px 5px;
+        text-align:center; 
+        color:#1e015e; 
+        margin-bottom: 20px;
+    }
+    h2{ 
+        color:#1976d2; 
+        margin-top: 32px;
+        }
+    .ClickMe a{
+        display: inline-block;
+        margin-top: 10px; 
+        background: #1976d2; 
+        color: #fff; 
+        padding: 10px 22px; 
+        border-radius: 5px; 
+        text-decoration: none; 
+        font-weight: bold;
+    }
+    .ClickMe a:hover {
+        filter: brightness(1.50);
+        color:black;
+    } 
+</style>
+
+<div style="max-width: 800px; margin: 40px auto; background: rgba(255,255,255,0.97); 
+    padding: 36px 32px; border-radius: 12px; box-shadow: 0 2px 16px #e3e3e3;">
+    
+    <h1>About ShelfSpace</h1>
+    
+    <p>
+        Welcome to <strong>ShelfSpace</strong>—your new favorite online book marketplace! We believe that discovering your next great read should be simple, fun, and tailored just for you. ShelfSpace was created to solve a problem every book lover knows: finding the perfect book in a sea of endless options can be overwhelming and time-consuming. Our platform is designed to make book shopping effortless, helping you quickly uncover titles that match your interests, without the endless scrolling.
+    </p>
+
+    <h2>Why Choose ShelfSpace?</h2>
+    <ul style="margin-left: 18px; font-size: 16px;">
+        <li><b>Personalized Discovery:</b> Enjoy recommendations and curated lists that fit your unique tastes, so you can spend less time searching and more time reading.</li>
+        <li><b>Easy Browsing:</b> Our clean, intuitive interface lets you filter and explore by category, author, or theme—making book hunting a joy, not a chore.</li>
+        <li><b>For Every Reader:</b> Whether you’re into bestsellers, indie gems, or children’s classics, ShelfSpace helps you find books you’ll love.</li>
+        <li><b>Community & Support:</b> We’re here for readers, authors, and sellers alike—building a vibrant marketplace where everyone can connect and thrive.</li>
+    </ul>
+
+    <h2>Our Mission</h2>
+    <p>
+        At ShelfSpace, our mission is to make book discovery delightful and accessible for everyone. We’re passionate about connecting readers with stories that inspire, entertain, and inform—one personalized recommendation at a time.
+    </p>
+
+    <h2>Meet the Team</h2>
+    <ul style="margin-left: 18px;">
+        <li>Awash Adhikari</li>
+        <li>Antoni Peev</li>
+        <li>Emilbek Zholdoshkan</li>
+        <li>Maria Ivy Guese</li>
+        <li>Silvana Cantizani</li>
+        <li>Tsz Ching Lai</li>
+    </ul>
+
+</div>
+
+
+
+    <div  class="ClickMe" style="margin-top: 36px; padding: 24px; background: #e3f2fd; border-radius: 8px; text-align: center;">
+        <h3 style="color: #1976d2; margin-bottom: 10px;">For Sellers &amp; Authors</h3>
+        <p style="font-size: 17px;">
+            Interested in partnering with ShelfSpace to sell your books or showcase your work as an author?
+            <br>
+            <a href="{{ url_for('contact') }}">CLICK HERE TO CONTACT US</a>
+        </p>
+    </div>
+</div>
+{% endblock %}

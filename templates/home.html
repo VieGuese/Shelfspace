@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="browse-section" style="max-width:900px; margin:40px auto; background:rgba(255,255,255,0.9); padding:30px; border-radius:12px;">
+    <h2 style="text-align:center; color:#2d3e50;">Browse Books</h2>
+    
+    <!-- View Cart Link (show only if cart has items) -->
+    {% if session['cart']|length > 0 %}
+        <div style="text-align:center; margin-bottom:16px;">
+            <a href="{{ url_for('view_cart') }}" style="color:#1976d2; font-weight:bold; font-size:16px;">View Cart ({{ session['cart']|length }})</a>
+        </div>
+    {% endif %}
+
+    <!-- Category Dropdown and Display All Button -->
+    <form id="category-form" method="GET" style="text-align:center; margin-bottom:30px;">
+        <label for="category" style="font-weight:bold;">Browse by:</label>
+        <select name="category" id="category" style="padding:8px 16px; font-size:16px; border-radius:4px; border:1px solid #ccc;">
+            <option value="">All Categories</option>
+            {% for cat in categories %}
+                <option value="{{ cat }}" {% if selected_category == cat %}selected{% endif %}>{{ cat }}</option>
+            {% endfor %}
+        </select>
+        <button type="submit" name="display_all" value="1" style="background-color:#1976d2; color:white; border:none; border-radius:4px; padding:8px 20px; font-size:16px; margin-left:8px; cursor:pointer;">
+            DISPLAY ALL BOOKS
+        </button>
+    </form>
+    <script>
+        // Auto-submit form when category changes
+        document.getElementById('category').addEventListener('change', function() {
+            document.getElementById('category-form').submit();
+        });
+    </script>
+
+    {% if selected_category %}
+        <div style="text-align:center; margin-bottom:20px;">
+            <span style="font-size:18px;">Showing books in <b>{{ selected_category }}</b></span>
+        </div>
+    {% endif %}
+
+    <table style="width:100%; border-collapse:separate; border-spacing:0 18px;">
+        <tbody>
+        {% for book in books %}
+            <tr style="background:rgba(245,245,245,0.95); border-radius:8px;">
+                <!-- Book Image -->
+                <td style="width:120px; text-align:center; vertical-align:top;"> 
+                    {% if 'image' in book and book['image'] %}
+                        <img src="{{ url_for('static', filename='images/' + book['image']) }}"
+                             alt="{{ book['title'] }}"
+                             style="width:100px; height:140px; object-fit:cover; border-radius:6px; box-shadow:0 1px 6px #aaa;">
+                    {% else %}
+                        <img src="{{ url_for('static', filename='images/default.jpg') }}"
+                             alt="{{ book['title'] }}"
+                             style="width:100px; height:140px; object-fit:cover; border-radius:6px; box-shadow:0 1px 6px #aaa;">
+                    {% endif %}
+                </td>
+                <!-- Book Info -->
+                <td style="vertical-align:top; padding:10px 20px;">
+                    <div style="font-size:18px; font-weight:bold; color:#333;">{{ book['title'] }}</div>
+                    <div style="font-size:15px; color:#666; margin-bottom:6px;">by {{ book['author'] }}</div>
+                    <div style="font-size:14px; color:#444; margin-bottom:8px;">{{ book['description'] }}</div>
+                    <div style="font-size:13px; color:#888; margin-bottom:6px;">
+                        <b>Categories:</b>
+                        {% for cat in book['categories'] %}
+                            <span style="background:#e3f2fd; color:#1976d2; padding:2px 8px; border-radius:12px; margin-right:4px; font-size:12px;">{{ cat }}</span>
+                        {% endfor %}
+                    </div>
+                    <div style="font-size:17px; color:#388e3c; font-weight:bold;">${{ "%.2f"|format(book['price']) }}</div>
+                </td>
+                <!-- Add to Cart / Wish List -->
+                <td style="vertical-align:middle; text-align:center; width:160px;">
+                    {% if book['stock'] > 0 %}
+                        <form method="POST" action="{{ url_for('add_to_cart', book_id=book['BookId']) }}">
+                            <button type="submit"
+                                    style="background-color:#ffb300; color:#fff; border:none; border-radius:4px; padding:10px 24px; font-size:16px; font-weight:bold; cursor:pointer; box-shadow:0 2px 6px #ffd54f;">
+                                Add to Cart
+                            </button>
+                        </form>
+                    {% else %}
+                        <button disabled
+                                style="background-color:#aaa; color:#fff; border:none; border-radius:4px; padding:10px 24px; font-size:16px; font-weight:bold; cursor:not-allowed; margin-bottom:6px;">
+                            Out of Stock
+                        </button>
+                        <form method="POST" action="{{ url_for('add_to_wishlist', book_id=book['BookId']) }}">
+                            <button type="submit"
+                                    style="background-color:#1976d2; color:#fff; border:none; border-radius:4px; padding:8px 18px; font-size:15px; font-weight:bold; cursor:pointer; margin-top:8px;">
+                                Add to Wish List
+                            </button>
+                        </form>
+                    {% endif %}
+                </td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="3" style="text-align:center; color:#888; font-size:18px; padding:40px;">
+                    No books found in this category.
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
