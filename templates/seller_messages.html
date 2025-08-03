@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div style="max-width: 1000px; margin: 40px auto; background: #fff; padding: 30px; border-radius: 12px; box-shadow: 0 2px 12px rgba(0,0,0,0.1);">
+
+    <h2>Messages from Customers</h2>
+
+    {% if messages %}
+    <table style="width:100%; border-collapse: collapse;">
+        <thead>
+            <tr style="background-color: #6308da; color: white;">
+                <th style="padding: 12px; border: 1px solid #ddd;">SENDER</th>
+                <th style="padding: 12px; border: 1px solid #ddd;">STATUS</th>
+                <th style="padding: 12px; border: 1px solid #ddd;">ACTION</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for msg in messages %}
+            <tr style="border: 1px solid #ddd;" {% if not msg.read %} font-weight: bold; background-color: #f0e6ff; {% endif %}">
+                <td style="padding: 12px; border: 1px solid #ddd;">
+                    {{ msg.buyer_name }} ({{ msg.buyer_email }})
+                </td>
+                <td style="padding: 12px; border: 1px solid #ddd;">{{ 'Unread' if not msg.read else 'Read' }}</td>
+                <td style="padding: 12px; border: 1px solid #ddd; text-align:center;">
+                    <a href="{{ url_for('view_seller_message', message_id=msg._id) }}">
+                        <button type="button">Read</button>
+                    </a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p>You have no messages.</p>
+    {% endif %}
+
+</div>
+
+{% endblock %}

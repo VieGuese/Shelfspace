@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div style="max-width: 1000px; margin: 40px auto; background: #fff; padding: 30px; border-radius: 12px; box-shadow: 0 2px 12px rgba(0,0,0,0.1);">
+    <h2>Send Message to Buyer</h2>
+
+    <form method="POST">
+        <label for="buyer_email"><strong>SEND TO:</strong></label><br>
+        <input type="email" id="buyer_email" name="buyer_email" value="{{ buyer_email }}" readonly style="width: 100%; padding: 10px; margin-bottom: 20px; font-size: 16px; background: #f0f0f0; border: 1px solid #ccc; border-radius: 6px;" />
+
+        <label for="buyer_name"><strong>CUSTOMER NAME:</strong></label><br>
+        <input type="text" id="buyer_name" name="buyer_name" value="{{ buyer_name }}" readonly style="width: 100%; padding: 10px; margin-bottom: 20px; font-size: 16px; background: #f0f0f0; border: 1px solid #ccc; border-radius: 6px;" />
+
+        <label for="message"><strong>Your Message:</strong></label><br>
+        <textarea id="message" name="message" rows="10" required style="width: 100%; padding: 10px; font-size: 16px; margin-bottom: 24px; border-radius: 6px; border: 1px solid #ccc;" placeholder="Type your message here...">{% if request.form.message %}{{ request.form.message }}{% else %}
+Hi, {{ buyer_name }},
+
+Thank you for your interest in buying "{{ book_title }}". 
+If you are still interested in buying it, 
+please deposit a payment at ___________ 
+and once you are done, please send us the following details:
+    FULL NAME,
+    SHIPPING ADDRESS,
+    CONTACT NUMBER,
+    ATTACHED PROOF OF PAYMENT.
+
+We only process orders that has complete details.
+
+Thank you!
+{% endif %}</textarea>
+        <div style="margin-top:20px;">
+            <button type="submit" name="action" value="send"
+                style="background:#1976d2; color:#fff; padding: 12px 28px;
+                font-size: 16px; border: none; border-radius: 6px; cursor: pointer;">Send</button>
+            <button type="submit" name="action" value="show_process"
+                style="margin-left: 18px; background:#43a047; color:white; padding: 12px 28px;
+                font-size: 16px; border: none; border-radius: 6px; cursor: pointer;">Process</button>
+        </div>
+    </form>
+</div>
+
+{% endblock %}

@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div style="max-width: 600px; margin: 40px auto; background: #fff; padding: 30px; border-radius: 12px; box-shadow: 0 2px 12px rgba(0,0,0,0.1);">
+    <h2>Process Order</h2>
+
+    <p><strong>Order ID:</strong> {{ order_id }}</p>
+
+    <div style="margin-bottom:20px; border:1px solid #eee; padding:12px; border-radius:6px;">
+        <strong>Customer Message:</strong>
+        <div style="background:#fafafa; border-radius:6px; padding:10px; margin-top:6px;">
+            {{ customer_message | replace('\n', '<br>')|safe }}
+        </div>
+    </div>
+
+    <form method="POST">
+        <label for="customer_name"><strong>CUSTOMER FULL NAME:</strong></label><br>
+        <input type="text" id="customer_name" name="customer_name" value="{{ buyer_name }}" required
+               style="width:100%;padding:10px; margin-bottom:15px;">
+
+        <label for="customer_address"><strong>CUSTOMER ADDRESS:</strong></label><br>
+        <input type="text" id="customer_address" name="customer_address" value="" required
+               style="width:100%;padding:10px; margin-bottom:15px;">
+
+        <label for="customer_phone"><strong>CUSTOMER PHONE NUMBER:</strong></label><br>
+        <input type="text" id="customer_phone" name="customer_phone" value="" required
+               style="width:100%;padding:10px; margin-bottom:20px;">
+
+        <button type="submit" name="action" value="process" style="background:#43a047; color:white; padding:12px 28px; font-size: 16px; border:none; border-radius:6px; cursor:pointer;">Process</button>
+        <a href="{{ url_for('seller_message', order_id=order_id, buyer_id=buyer_id) }}" style="margin-left:28px;">
+            <button type="button" style="background:#bbb; color:white; padding:12px 28px; font-size: 16px; border:none; border-radius:6px; cursor:pointer;">Cancel</button>
+        </a>
+    </form>
+</div>
+
+{% endblock %}

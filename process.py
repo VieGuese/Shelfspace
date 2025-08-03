@@ -23,6 +23,7 @@ users_collection = db["users"]
 books_collection = db["books"]
 deleted_users_collection = db["deleted_users"]
 
+
 @app.route('/')
 def index():
     return render_template('index.html')
@@ -66,6 +67,7 @@ def login():
             error = "Invalid username or password."
 
     return render_template('login.html', error=error)
+
 
 
 @app.route('/logout')
@@ -132,6 +134,7 @@ def admin_dashboard():
     
     users = list(users_collection.find(query))
     return render_template('admin_dashboard.html', users=users, filter_role=filter_role, search_query=search_query)
+
 
 @app.route('/admin/user/<user_id>')
 def admin_view_user(user_id):
@@ -225,6 +228,7 @@ def create_seller_account(user_id):
 
     return render_template('create_seller_account.html', user=user)
 
+
 @app.route('/admin/delete_user/<user_id>', methods=['POST'])
 def delete_user(user_id):
     if session.get('role') != 'admin':
@@ -253,6 +257,7 @@ def delete_user(user_id):
 
     flash("User deleted and archived.", "success")
     return redirect(url_for('admin_dashboard'))
+
 
 
 @app.route('/admin/approve_seller/<user_id>', methods=['GET', 'POST'])
@@ -325,6 +330,7 @@ def admin_approve_seller(user_id):
     # GET request: render the approval page
     return render_template('admin_approve_seller.html', user=user)
 
+
 from flask import Flask, render_template, request, redirect, url_for, session, flash
 from bson.objectid import ObjectId
 
@@ -382,6 +388,7 @@ def admin_content_management():
         tab=tab
     )
 
+
 @app.route('/admin/content/<content_type>/<item_id>')
 def admin_content_view_detail(content_type, item_id):
     if session.get('role') != 'admin':
@@ -434,6 +441,7 @@ def admin_content_view_detail(content_type, item_id):
         flash("Invalid content type.", "danger")
         return redirect(url_for('admin_content_management'))
 
+
 # Keep the action routes from before (approve/reject for books, ok/delete for reviews)
 @app.route('/admin/content/book/<item_id>/<action>', methods=['POST'])
 def admin_content_book_action(item_id, action):
@@ -456,6 +464,7 @@ def admin_content_book_action(item_id, action):
         flash("Invalid action.", "danger")
 
     return redirect(url_for('admin_content_view_detail', content_type='book', item_id=item_id))
+
 
 @app.route('/admin/content/review/<item_id>/<action>', methods=['POST'])
 def admin_content_review_action(item_id, action):
@@ -489,26 +498,27 @@ def admin_content_review_action(item_id, action):
 
 
 
-from flask import request, session, redirect, url_for, render_template
+from flask import render_template, redirect, url_for, session
 from bson.objectid import ObjectId
 
 @app.route('/seller/orders')
 def seller_manage_orders():
+    # Check login and seller role
     if 'user_id' not in session or session.get('role') != 'seller':
         return redirect(url_for('login'))
 
-    seller_id = session['user_id']
-    search_term = request.args.get('search', '').strip().lower()
+    seller_id = session['user_id']  # This is a string
 
-    # Base query: Only orders with relevant statuses
-    query = {'status': {'$in': ['pending', 'confirmed', 'shipped', 'delivered']}}
-
-    # Fetch all orders first (you can optimize)
-    orders_cursor = db['orders'].find(query).sort('created_at', -1)
+    # Fetch orders with relevant statuses, newest first
+    orders_cursor = db['orders'].find({
+        'status': {'$in': ['pending', 'confirmed', 'shipped', 'delivered']}
+    }).sort('created_at', -1)
 
     seller_orders = []
 
+    # Iterate orders and extract books that belong to this seller
     for order in orders_cursor:
+        # Lookup user info
         user = None
         if order.get('user_id'):
             try:
@@ -516,8 +526,11 @@ def seller_manage_orders():
             except Exception:
                 user = None
 
+        # For each book in this order, check if seller matches
         for item in order.get('books', []):
+            # Compare seller_id as string
             if 'seller_id' in item and str(item['seller_id']) == seller_id:
+                # Lookup book info
                 book = None
                 if item.get('book_id'):
                     try:
@@ -527,21 +540,13 @@ def seller_manage_orders():
 
                 current_stock = book.get('in_stock', 0) if book else 0
 
-                order_id_str = str(order.get('_id', ''))
-                book_title = book.get('title', 'Unknown Book') if book else 'Unknown Book'
-                user_fullname = f"{user.get('first_name', '')} {user.get('last_name', '')}".strip() if user else "Unknown User"
-
-                # If search term is provided, filter by order_id or book_title (case insensitive)
-                if search_term:
-                    if (search_term not in order_id_str.lower()) and (search_term not in book_title.lower()):
-                        continue  # skip this order item as it does not match the search
-
+                # Prepare order info dict for template
                 seller_orders.append({
-                    'order_id': order_id_str,
+                    'order_id': str(order.get('_id', '')),
                     'user_id': str(user.get('_id')) if user else None,
-                    'user_fullname': user_fullname,
+                    'user_fullname': f"{user.get('first_name', '')} {user.get('last_name', '')}".strip() if user else "Unknown User",
                     'user_email': user.get('email') if user else None,
-                    'book_title': book_title,
+                    'book_title': book.get('title', 'Unknown Book') if book else 'Unknown Book',
                     'in_stock': current_stock,
                     'price': item.get('price', 0),
                     'status': order.get('status', 'pending').capitalize(),
@@ -562,6 +567,7 @@ def process_order(order_id):
 
     flash('Order processed successfully.', 'success')
     return redirect(url_for('seller_manage_orders'))
+
 
 @app.route('/admin/orders')
 def admin_view_orders():
@@ -595,6 +601,7 @@ def admin_view_orders():
         })
 
     return render_template('admin_orders.html', orders=enriched_orders)
+
 
 @app.route('/admin/order/<order_id>')
 def admin_order_detail(order_id):
@@ -635,6 +642,7 @@ def admin_order_detail(order_id):
 
 
 
+
 from bson.objectid import ObjectId
 
 @app.context_processor
@@ -648,6 +656,7 @@ def inject_unread_count():
         count = db.messages.count_documents({"to_user_id": user_oid, "read": False})
         return {'unread_count': count}
     return {'unread_count': 0}
+
 
 
 @app.route('/home', methods=['GET', 'POST'])
@@ -683,6 +692,7 @@ def home():
     )
 
 
+
 @app.route('/add_to_wishlist/<book_id>', methods=['POST'])
 def add_to_wishlist(book_id):
     # Make sure user is logged in
@@ -710,6 +720,7 @@ def add_to_wishlist(book_id):
 
     # Redirect back to home page
     return redirect(url_for('home'))
+
 
 @app.route('/about')
 def about():
@@ -763,6 +774,7 @@ def contact_seller():
 
     return render_template('contact_seller.html', error=error)
 
+
 @app.route('/seller/dashboard')
 def seller_dashboard():
     if 'user_id' not in session or session.get('role') != 'seller':
@@ -784,6 +796,7 @@ def seller_dashboard():
     return render_template('seller_dashboard.html', new_orders_count=new_orders_count)
 
 
+
 @app.route('/seller/manage')
 def seller_manage():
     if 'user_id' not in session or session.get('role') != 'seller':
@@ -798,13 +811,8 @@ def seller_manage():
 
 
 
-import os
-from datetime import datetime
-from flask import request, redirect, url_for, flash, render_template, session
-from werkzeug.utils import secure_filename
-
-ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 UPLOAD_FOLDER = 'static/books'
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 def allowed_file(filename):
@@ -817,47 +825,23 @@ def add_book():
 
     if request.method == 'POST':
         file = request.files.get('thumbnail')
-        if not file or file.filename == '':
-            flash("Thumbnail image is required.", "danger")
-            return render_template('add_book.html')  # Re-display form with message
+        if file and allowed_file(file.filename):
+            filename = secure_filename(file.filename)
+            save_dir = os.path.join(app.root_path, app.config['UPLOAD_FOLDER'])
+            os.makedirs(save_dir, exist_ok=True)
+            file.save(os.path.join(save_dir, filename))
+            thumbnail_url = url_for('static', filename=f'books/{filename}')
+        else:
+            thumbnail_url = None
 
-        if not allowed_file(file.filename):
-            flash("Unsupported image format. Allowed: png, jpg, jpeg, gif.", "danger")
-            return render_template('add_book.html')
+        # Get other form data
+        title = request.form.get('title')
+        author = request.form.get('author')
+        categories = request.form.getlist('categories')  # list of categories
+        price = float(request.form.get('price', 0))
+        in_stock = int(request.form.get('in_stock', 0))
 
-        filename = secure_filename(file.filename)
-        timestamp = int(datetime.utcnow().timestamp())
-        filename = f"{timestamp}_{filename}"
-
-        save_dir = os.path.join(app.root_path, app.config['UPLOAD_FOLDER'])
-        os.makedirs(save_dir, exist_ok=True)
-        filepath = os.path.join(save_dir, filename)
-        file.save(filepath)
-
-        thumbnail_url = url_for('static', filename=f'books/{filename}')
-
-        # Retrieve and validate other form fields
-        title = request.form.get('title', '').strip()
-        author = request.form.get('author', '').strip()
-        categories = request.form.getlist('categories')  # list from checkboxes
-        price_raw = request.form.get('price', '0').strip()
-        in_stock_raw = request.form.get('in_stock', '0').strip()
-
-        try:
-            price = float(price_raw)
-        except ValueError:
-            flash("Invalid price value.", "danger")
-            return render_template('add_book.html')
-
-        try:
-            in_stock = int(in_stock_raw)
-            if in_stock < 0:
-                raise ValueError
-        except ValueError:
-            flash("Invalid stock value.", "danger")
-            return render_template('add_book.html')
-
-        # Insert into MongoDB
+        # Insert book into your MongoDB collection
         books_collection.insert_one({
             'seller_id': session['user_id'],
             'thumbnail_url': thumbnail_url,
@@ -866,125 +850,12 @@ def add_book():
             'categories': categories,
             'price': price,
             'in_stock': in_stock,
-            'status': 'pending',
-            'created_at': datetime.utcnow(),
-            'updated_at': datetime.utcnow()
+            'status': 'pending'  # Or whatever initial status
         })
 
-        flash("Book added successfully.", "success")
         return redirect(url_for('seller_manage'))
 
-    # GET request
     return render_template('add_book.html')
-
-
-
-
-
-
-import os
-from datetime import datetime
-from flask import request, redirect, url_for, flash, render_template, session
-from werkzeug.utils import secure_filename
-from bson.objectid import ObjectId
-
-ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
-UPLOAD_FOLDER = 'static/books'
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-
-def allowed_file(filename):
-    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
-
-@app.route('/seller/book/edit/<book_id>', methods=['GET', 'POST'])
-def edit_book(book_id):
-    if 'user_id' not in session or session.get('role') != 'seller':
-        return redirect(url_for('login'))
-
-    seller_id = session['user_id']
-
-    try:
-        book_oid = ObjectId(book_id)
-    except Exception:
-        flash("Invalid book ID.", "danger")
-        return redirect(url_for('seller_manage'))
-
-    book = books_collection.find_one({"_id": book_oid, "seller_id": seller_id})
-    if not book:
-        flash("Book not found or access denied.", "danger")
-        return redirect(url_for('seller_manage'))
-
-    if request.method == 'POST':
-        title = request.form.get('title', '').strip()
-        author = request.form.get('author', '').strip()
-        categories_raw = request.form.get('categories', '').strip()
-        categories = [c.strip() for c in categories_raw.split(',') if c.strip()]
-        price_raw = request.form.get('price', '').strip()
-        increment_raw = request.form.get('increment_stock', '0').strip()
-
-        try:
-            price = float(price_raw)
-        except ValueError:
-            flash("Invalid price value.", "danger")
-            return render_template('seller_edit_book.html', book=book, categories_str=categories_raw)
-
-        try:
-            increment = int(increment_raw)
-            if increment < 0:
-                increment = 0
-        except ValueError:
-            increment = 0
-
-        new_stock = max(0, book.get('in_stock', 0) + increment)
-
-        file = request.files.get('thumbnail')
-        thumbnail_url = book.get('thumbnail_url', '')  # default to old URL
-
-        if file and file.filename != '':
-            if allowed_file(file.filename):
-                filename = secure_filename(file.filename)
-                timestamp = int(datetime.utcnow().timestamp())
-                filename = f"{book_id}_{timestamp}_{filename}"
-
-                save_dir = os.path.join(app.root_path, app.config['UPLOAD_FOLDER'])
-                os.makedirs(save_dir, exist_ok=True)
-                filepath = os.path.join(save_dir, filename)
-                file.save(filepath)
-
-                thumbnail_url = url_for('static', filename=f'books/{filename}') + f"?v={timestamp}"
-            else:
-                flash("Unsupported image format. Allowed: png, jpg, jpeg, gif.", "danger")
-                return render_template('seller_edit_book.html', book=book, categories_str=categories_raw)
-
-        # Update in DB
-        books_collection.update_one(
-            {"_id": book_oid, "seller_id": seller_id},
-            {"$set": {
-                "title": title,
-                "author": author,
-                "categories": categories,
-                "price": price,
-                "in_stock": new_stock,
-                "thumbnail_url": thumbnail_url,
-                "updated_at": datetime.utcnow()
-            }}
-        )
-
-        # Refresh book data for template
-        book = books_collection.find_one({"_id": book_oid, "seller_id": seller_id})
-        categories_str = ', '.join(book.get('categories', []))
-
-        flash("Book updated successfully.", "success")
-        return render_template('seller_edit_book.html', book=book, categories_str=categories_str)
-
-    # GET request: render form with existing data
-    categories_str = ', '.join(book.get('categories', []))
-    return render_template('seller_edit_book.html', book=book, categories_str=categories_str)
-
-
-
-
-
-
 
 @app.route('/contact/author', methods=['GET', 'POST'])
 def contact_author():
@@ -1029,6 +900,7 @@ def contact_author():
                 return render_template('contact_author_thankyou.html', name=first_name)
 
     return render_template('contact_author.html', error=error)
+
 
 @app.route('/admin/approve_author/<user_id>', methods=['GET', 'POST'])
 def admin_approve_author(user_id):
@@ -1101,6 +973,7 @@ def admin_approve_author(user_id):
     return render_template('admin_approve_author.html', user=user)
 
 
+
 @app.route('/returns')
 def returns():
     return render_template('returns.html')
@@ -1116,6 +989,7 @@ def privacy():
 @app.route('/faqs')
 def faqs():
     return render_template('faqs.html')
+
 
 from flask import request, redirect, url_for, session, flash, render_template
 from bson.objectid import ObjectId
@@ -1240,18 +1114,19 @@ def process_cart_order():
         return redirect(url_for('view_cart'))
 
 
-from flask import request, redirect, url_for, session, flash, render_template
+
+from flask import request, flash
+
+from datetime import datetime
+from bson.objectid import ObjectId
+
+
+from flask import Flask, render_template, request, redirect, url_for, session, flash
 from bson.objectid import ObjectId
 from datetime import datetime
-import os
-from werkzeug.utils import secure_filename
-
-ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'pdf'}
-UPLOAD_FOLDER = 'static/uploads'
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-
-def allowed_file(filename):
-    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+from flask import request, session, flash, redirect, url_for, render_template
+from bson.objectid import ObjectId
+from datetime import datetime
 
 @app.route('/seller/message/<order_id>/<buyer_id>', methods=['GET', 'POST'])
 def seller_message(order_id, buyer_id):
@@ -1259,8 +1134,6 @@ def seller_message(order_id, buyer_id):
         return redirect(url_for('login'))
 
     seller_id = session['user_id']
-
-    # Validate ObjectIds
     try:
         buyer_oid = ObjectId(buyer_id)
         order_oid = ObjectId(order_id)
@@ -1279,8 +1152,8 @@ def seller_message(order_id, buyer_id):
         flash("Order not found.", "danger")
         return redirect(url_for('seller_manage_orders'))
 
-    # Prepare book title if needed
-    book_title = None
+    # Optional: book title logic
+    book_title = "the book"
     for item in order.get('books', []):
         if str(item.get('seller_id')) == seller_id:
             book = books_collection.find_one({'_id': ObjectId(item['book_id'])}) if item.get('book_id') else None
@@ -1289,80 +1162,41 @@ def seller_message(order_id, buyer_id):
                 break
 
     if request.method == 'POST':
-        action = request.form.get('action')
+        action = request.form.get("action")
 
-        if action == 'send':
-            # Existing sending message logic
-            message_body = request.form.get('message', '').strip()
-            if not message_body:
-                flash("Message cannot be empty.", "danger")
-                return render_template(
-                    'seller_reply_message.html',
-                    buyer_email=buyer.get('email', ''),
-                    buyer_name=f"{buyer.get('first_name', '')} {buyer.get('last_name', '')}",
-                    book_title=book_title,
-                    request=request
-                )
+        if action == "send":
+            # ... existing send message code ...
+            pass
 
-            files = request.files.getlist('attachments') if 'attachments' in request.files else []
-            attachment_urls = []
-            save_dir = os.path.join(app.root_path, app.config['UPLOAD_FOLDER'])
-            os.makedirs(save_dir, exist_ok=True)
-
-            for file in files:
-                if file and file.filename != '' and allowed_file(file.filename):
-                    filename = secure_filename(file.filename)
-                    timestamp = int(datetime.utcnow().timestamp())
-                    filename = f"{seller_id}_{timestamp}_{filename}"
-                    filepath = os.path.join(save_dir, filename)
-                    file.save(filepath)
-                    url = url_for('static', filename=f'uploads/{filename}')
-                    attachment_urls.append(url)
-
-            message_doc = {
-                "from_user_id": seller_oid,
-                "to_user_id": buyer_oid,
+        elif action == "show_process":
+            # ---------------------------------
+            # Fetch the most recent customer message for this order/seller/buyer
+            customer_message_doc = db.messages.find_one({
                 "order_id": order_oid,
-                "message": message_body,
-                "timestamp": datetime.utcnow(),
-                "read": False,
-                "attachments": attachment_urls
-            }
+                "from_user_id": buyer_oid,
+                "to_user_id": seller_oid
+            }, sort=[("timestamp", -1)])
 
-            db.messages.insert_one(message_doc)
-            flash("Your message has been sent to the buyer.", "success")
-            return redirect(url_for('seller_manage_orders'))
+            customer_message = customer_message_doc["message"] if customer_message_doc else "(No message from customer)"
 
-        elif action == 'show_process':
-            # Render the seller_process_order.html template with required data
-            # Optionally, you can pass the original buyer message if you want to show it in the form
-            last_message = db.messages.find_one(
-                {"order_id": order_oid, "from_user_id": buyer_oid, "to_user_id": seller_oid},
-                sort=[("timestamp", -1)]
-            )
-            customer_message = last_message['message'] if last_message else ''
-
-            buyer_name = f"{buyer.get('first_name', '')} {buyer.get('last_name', '')}"
-
-            return render_template(
-                'seller_process_order.html',
+            return render_template('seller_process_order.html',
                 order_id=order_id,
                 buyer_id=buyer_id,
-                buyer_name=buyer_name,
+                buyer_name=f"{buyer.get('first_name', '')} {buyer.get('last_name', '')}",
+                book_title=book_title,
                 customer_message=customer_message
             )
 
-        else:
-            flash("Invalid action.", "danger")
-            return redirect(url_for('seller_manage_orders'))
+        elif action == "process":
+            # ... (processing the order, as before) ...
+            pass
 
-    # GET request: render the message form
+    # GET request or regular reply logic (unchanged)
     return render_template(
         'seller_reply_message.html',
         buyer_email=buyer.get('email', ''),
         buyer_name=f"{buyer.get('first_name', '')} {buyer.get('last_name', '')}",
-        book_title=book_title,
-        request=request
+        book_title=book_title
     )
 
 
@@ -1370,8 +1204,6 @@ def seller_message(order_id, buyer_id):
 
 
 
-
-from flask import session, redirect, url_for, flash, render_template
 from bson.objectid import ObjectId
 
 @app.route('/seller/messages')
@@ -1379,20 +1211,18 @@ def seller_messages():
     if 'user_id' not in session or session.get('role') != 'seller':
         return redirect(url_for('login'))
 
-    try:
-        seller_oid = ObjectId(session['user_id'])
-    except Exception:
-        flash("Invalid user ID in session.", "danger")
-        return redirect(url_for('login'))
+    seller_oid = ObjectId(session['user_id'])
 
+    # Fetch messages sent to this seller, sorted by newest first
     messages = list(db.messages.find({"to_user_id": seller_oid}).sort("timestamp", -1))
 
+    # Enrich messages with buyer info for display
     enriched_messages = []
     for msg in messages:
         buyer = users_collection.find_one({'_id': msg.get('from_user_id')})
         buyer_name = f"{buyer.get('first_name', '')} {buyer.get('last_name', '')}" if buyer else "Unknown Buyer"
         buyer_email = buyer.get('email', 'Unknown') if buyer else "Unknown"
-
+        
         enriched_messages.append({
             '_id': msg.get('_id'),
             'order_id': msg.get('order_id'),
@@ -1401,18 +1231,16 @@ def seller_messages():
             'buyer_name': buyer_name,
             'buyer_email': buyer_email,
             'attachments': msg.get('attachments', []),
-            'in_reply_to': msg.get('in_reply_to'),
-            'read': msg.get('read', False),
+            'in_reply_to': msg.get('in_reply_to')  # link to original msg if it's a reply
         })
 
-    # Mark unread as read after fetching
+    # Mark all unread messages as read (AFTER fetching), only if there are any
     db.messages.update_many({
         "to_user_id": seller_oid,
         "read": False
     }, {"$set": {"read": True}})
 
     return render_template('seller_messages.html', messages=enriched_messages)
-
 
 
 
@@ -1437,22 +1265,24 @@ def view_seller_message(message_id):
         flash("Message not found or access denied.", "danger")
         return redirect(url_for('seller_messages'))
 
+    # Get buyer info for display
     buyer = users_collection.find_one({'_id': msg.get('from_user_id')}) if msg.get('from_user_id') else None
     buyer_name = f"{buyer.get('first_name', '')} {buyer.get('last_name', '')}" if buyer else 'Unknown Buyer'
     buyer_email = buyer.get('email', 'Unknown') if buyer else 'Unknown'
     buyer_id = str(buyer['_id']) if buyer else ''
 
-    # Mark as read
+    # Mark message as read if unread
     if not msg.get('read', False):
         db.messages.update_one({'_id': msg_oid}, {'$set': {'read': True}})
 
-    return render_template(
-        'view_seller_reply_message.html',
-        message=msg,
-        buyer_name=buyer_name,
-        buyer_email=buyer_email,
-        buyer_id=buyer_id
-    )
+    return render_template('view_seller_message.html',
+                           message=msg,
+                           buyer_name=buyer_name,
+                           buyer_email=buyer_email,
+                           buyer_id=buyer_id)  # THIS IS WHAT UNLOCKS CORRECT REPLY
+
+
+
 
 
 
@@ -1471,6 +1301,7 @@ def delete_seller_message(message_id):
 
     return redirect(url_for('seller_messages'))
 
+
 @app.route('/customer/messages')
 def customer_messages():
     if 'user_id' not in session or session.get('role') != 'customer':
@@ -1478,15 +1309,20 @@ def customer_messages():
 
     user_oid = ObjectId(session['user_id'])
 
+    # Fetch messages sent to this customer, sorted by newest first
     msgs = list(db.messages.find({"to_user_id": user_oid}).sort("timestamp", -1))
 
     enriched_msgs = []
     for msg in msgs:
+        # Lookup sender ("from_user_id") info
         sender = users_collection.find_one({'_id': msg.get('from_user_id')})
         sender_email = sender.get('email', 'Unknown') if sender else 'Unknown'
+
+        # Attach the sender_email to the message dict for template use
         msg['_sender_email'] = sender_email
         enriched_msgs.append(msg)
 
+    # Mark all unread messages as read now that they appear in the inbox
     db.messages.update_many(
         {"to_user_id": user_oid, "read": False},
         {"$set": {"read": True}}
@@ -1495,69 +1331,6 @@ def customer_messages():
     return render_template('customer_messages.html', messages=enriched_msgs)
 
 
-
-
-
-from flask import request, redirect, url_for, session, flash, render_template
-from bson.objectid import ObjectId
-from datetime import datetime
-
-@app.route('/customer/message/reply/<message_id>', methods=['GET', 'POST'])
-def customer_reply_message(message_id):
-    if 'user_id' not in session or session.get('role') != 'customer':
-        return redirect(url_for('login'))
-    user_oid = ObjectId(session['user_id'])
-    try:
-        msg_oid = ObjectId(message_id)
-    except Exception:
-        flash("Invalid message ID.", "danger")
-        return redirect(url_for('customer_messages'))
-
-    orig_msg = db.messages.find_one({"_id": msg_oid})
-    if not orig_msg or orig_msg.get('to_user_id') != user_oid:
-        flash("Message not found or unauthorized.", "danger")
-        return redirect(url_for('customer_messages'))
-
-    seller_oid = orig_msg.get('from_user_id')
-    if not isinstance(seller_oid, ObjectId):
-        seller_oid = ObjectId(seller_oid)
-
-    if request.method == 'POST':
-        reply_text = request.form.get('reply_text', '').strip()
-        if not reply_text:
-            flash("Message cannot be empty", "danger")
-            return render_template('customer_reply_message.html', original_message=orig_msg)
-
-        files = request.files.getlist('attachments')
-        attachment_urls = []
-
-        save_dir = os.path.join(app.root_path, app.config['UPLOAD_FOLDER'])
-        os.makedirs(save_dir, exist_ok=True)
-
-        for file in files:
-            if file and file.filename and allowed_file(file.filename):
-                filename = secure_filename(file.filename)
-                timestamp = int(datetime.utcnow().timestamp())
-                filename = f"{session['user_id']}_{timestamp}_{filename}"
-                file.save(os.path.join(save_dir, filename))
-                url = url_for('static', filename=f'uploads/{filename}')
-                attachment_urls.append(url)
-
-        reply_doc = {
-            "from_user_id": user_oid,
-            "to_user_id": seller_oid,
-            "order_id": orig_msg.get('order_id'),
-            "message": reply_text,
-            "timestamp": datetime.utcnow(),
-            "read": False,
-            "attachments": attachment_urls,
-            "in_reply_to": orig_msg['_id']
-        }
-        db.messages.insert_one(reply_doc)
-        flash("Your reply has been sent.", "success")
-        return redirect(url_for('customer_messages'))
-
-    return render_template('customer_reply_message.html', original_message=orig_msg)
 
 
 
@@ -1591,6 +1364,7 @@ def view_message(message_id):
 
 
 
+
 @app.route('/customer/messages/delete/<message_id>', methods=['POST'])
 def delete_message(message_id):
     if 'user_id' not in session or session.get('role') != 'customer':
@@ -1606,29 +1380,6 @@ def delete_message(message_id):
 
     return redirect(url_for('customer_messages'))
 
-
-
-@app.route('/seller/book/delete/<book_id>', methods=['POST'])
-def delete_book(book_id):
-    if 'user_id' not in session or session.get('role') != 'seller':
-        return redirect(url_for('login'))
-
-    seller_id = session['user_id']
-
-    try:
-        book_oid = ObjectId(book_id)
-    except:
-        flash("Invalid book ID.", "danger")
-        return redirect(url_for('seller_manage'))
-
-    result = books_collection.delete_one({"_id": book_oid, "seller_id": seller_id})
-
-    if result.deleted_count:
-        flash("Book deleted successfully.", "success")
-    else:
-        flash("Book not found or access denied.", "danger")
-
-    return redirect(url_for('seller_manage'))
 
 
 
@@ -1655,10 +1406,11 @@ def seller_conversation(order_id, buyer_id):
     return render_template('seller_conversation.html', messages=messages, order_id=order_id, buyer_id=buyer_id)
 
 
+
 import os
 from werkzeug.utils import secure_filename
 
-UPLOAD_FOLDER = 'static/books'
+UPLOAD_FOLDER = 'static/uploads'
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'pdf'}
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 

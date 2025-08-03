@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div style="max-width: 1000px; margin: 40px auto; background: #fff; padding: 30px; border-radius: 12px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.1);">
+
+    <h2>Reply to Seller</h2>
+
+    <p><strong>Original Message:</strong></p>
+    <div style="border: 1px solid #ddd; padding: 15px; border-radius: 8px; background-color: #f9f9f9; margin-bottom: 20px;">
+        {{ original_message.message | replace('\n', '<br>') | safe }}
+    </div>
+
+    <form method="POST" enctype="multipart/form-data">
+        <label for="reply_text"><strong>Your Reply:</strong></label><br>
+        <textarea id="reply_text" name="reply_text" rows="10" required
+                  style="width: 100%; padding: 10px; font-size: 16px; border-radius: 6px; border: 1px solid #ccc;"
+                  placeholder="Type your message here...">{{ request.form.reply_text or '' }}</textarea><br><br>
+
+        <label for="attachments"><strong>Upload Photo or PDF (optional):</strong></label><br>
+        <input type="file" id="attachments" name="attachments" multiple accept="image/*,application/pdf"
+               style="margin-bottom: 24px;"><br>
+
+        <button type="submit" style="background:#1976d2; color:#fff; padding: 12px 28px; font-size: 16px; border: none; border-radius: 6px; cursor: pointer;">
+            Send Reply
+        </button>
+        <a href="{{ url_for('customer_messages') }}" style="margin-left: 20px;">Cancel</a>
+    </form>
+
+</div>
+
+{% endblock %}

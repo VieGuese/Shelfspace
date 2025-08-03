@@ -173,6 +173,24 @@
                                 <button type="submit" class="status-btn activate-btn">ACTIVATE</button>
                             </form>
                         {% endif %}
+                    {% elif user['role'] == 'author' %}
+                        {% set author_status = user.get('status', 'pending') %}
+                        {% if author_status in ['pending', 'not_approved'] %}
+                                <a href="{{ url_for('admin_approve_author', user_id=user['_id']) }}">
+                                    <button class="status-btn approve-btn">VIEW APPLICATION</button>
+                                </a>
+                        {% elif author_status == 'active' %}
+                            <form method="POST" action="{{ url_for('admin_user_status', user_id=user['_id']) }}" style="display:inline;">
+                                <input type="hidden" name="new_status" value="suspended">
+                                <button type="submit" class="status-btn suspend-btn">SUSPEND</button>
+                            </form>
+                        {% elif author_status == 'suspended' %}
+                            <form method="POST" action="{{ url_for('admin_user_status', user_id=user['_id']) }}" style="display:inline;">
+                                <input type="hidden" name="new_status" value="active">
+                                <button type="submit" class="status-btn activate-btn">ACTIVATE</button>
+                            </form>
+                        {% endif %}
+
                     {% else %}
                         {% set user_status = user.get('status', 'active') %}
                         {% if user_status == 'active' %}

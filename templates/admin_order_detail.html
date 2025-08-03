@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+{% block content %}
+<style>
+    .detail-container {
+        max-width: 800px;
+        margin: 40px auto;
+        background: #fff;
+        padding: 28px 24px;
+        border-radius: 12px;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+    }
+    table.detail-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+    }
+    table.detail-table th, table.detail-table td {
+        padding: 12px 15px;
+        border-bottom: 1px solid #ddd;
+        text-align: left;
+    }
+    table.detail-table th {
+        background: #f5f5f5;
+        font-weight: 600;
+    }
+    .table-header {
+        background: #e3f2fd;
+        font-weight: 700;
+        text-transform: uppercase;
+    }
+
+    h2, strong {
+        max-width: 800px;
+        margin: 40px auto;
+        background: #fff;
+        color: cornflowerblue;
+        text-transform: uppercase;
+        text-decoration: solid;
+    }
+</style>
+
+<div class="detail-container">
+    <h2 style="color: #501ea1;">Order Details - Order ID: {{ order_id }}</h2>
+    <p><strong>Customer:</strong> {{ user.first_name }} {{ user.last_name }} ({{ user.username }})</p>
+    <p><strong>Status:</strong> {{ status }}</p>
+    <p><strong>Ordered At:</strong> {{ created_at }}</p>
+    <p><strong>Total Price:</strong> ${{ "%.2f"|format(total_price) }}</p>
+
+<table class="detail-table">
+    <thead>
+        <tr class="table-header">
+            <th>Thumbnail</th>
+            <th>Book Title</th>
+            <th>Quantity</th>
+            <th>Price (each)</th>
+            <th>Seller</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for book in books %}
+        <tr>
+            <td style="width:100px; text-align:center;">
+                {% if book.thumbnail_url %}
+                    <img src="{{ book.thumbnail_url }}" alt="Thumbnail" style="width:80px; height:110px; object-fit:cover; border-radius:6px; box-shadow: 0 1px 6px #aaa;">
+                {% else %}
+                    <div style="width:80px; height:110px; background:#eee; border-radius:6px; display:flex; align-items:center; justify-content:center; color:#bbb; font-size:13px;">
+                        No Image
+                    </div>
+                {% endif %}
+            </td>
+            <td>{{ book.title }}</td>
+            <td>{{ book.quantity }}</td>
+            <td>${{ "%.2f"|format(book.price) }}</td>
+            <td>
+                <strong>{{ book.seller_fullname }}</strong><br>
+                <small>{{ book.seller_username }}</small>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+
+    <div style="margin-top: 20px;">
+        <a href="{{ url_for('admin_view_orders') }}">
+            <button type="button" style="padding:10px 20px; font-size:16px;">Back to Orders</button>
+        </a>
+    </div>
+</div>
+{% endblock %}

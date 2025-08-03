@@ -1,0 +1,143 @@
+{% extends "base.html" %}
+{% block content %}
+
+<style>
+    .orders-container {
+        max-width: 1100px;
+        margin: 40px auto;
+        background: #fff;
+        padding: 20px 24px;
+        border-radius: 12px;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+
+        /* Added to prevent overflow */
+        overflow-x: auto;
+        box-sizing: border-box; /* include padding in width */
+    }
+    table.orders-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+
+        /* Fix column layout and ensure wrapping */
+        table-layout: fixed;
+        word-wrap: break-word;
+    }
+    table.orders-table th, table.orders-table td {
+        padding: 12px 15px;
+        border-bottom: 1px solid #ddd;
+        text-align: left;
+        vertical-align: top;
+
+        /* Prevent cell overflow */
+        max-width: 200px;
+        overflow-wrap: break-word;
+    }
+    table.orders-table th {
+        background: #f5f5f5;
+        font-weight: 600;
+    }
+    .order-status {
+        font-weight: 700;
+        text-transform: uppercase;
+    }
+    .status-pending { color: orange; }
+    .status-confirmed { color: #1976d2; }
+    .status-shipped { color: #43a047; }
+    .status-delivered { color: #388e3c; }
+    .status-cancelled { color: #b71c1c; }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+        .orders-container {
+            padding: 16px 12px;
+            max-width: 100%;
+        }
+        table.orders-table th, table.orders-table td {
+            font-size: 14px;
+            padding: 8px 10px;
+            max-width: 150px;
+        }
+    }
+
+    /* Filter Navigation Styles */
+    .order-filter-nav {
+        text-align: center;
+        margin-top: 16px;
+        margin-bottom: 24px;
+    }
+    .order-filter-nav a {
+        display: inline-block;
+        margin: 0 10px;
+        padding: 8px 20px;
+        background-color: #1976d2;
+        color: white;
+        font-weight: bold;
+        border-radius: 6px;
+        text-decoration: none;
+        transition: background-color 0.3s;
+    }
+    .order-filter-nav a.active,
+    .order-filter-nav a:hover {
+        background-color: #004ba0;
+    }
+    
+    .view-details-btn {
+        display: inline-block;
+        margin: 0 10px;
+        padding: 8px 20px;
+        background-color: blue;
+        color: white;
+        font-weight: bold;
+        border-radius: 6px;
+        text-decoration: none;
+        transition: background-color 0.3s;
+    }
+</style>
+
+<div class="orders-container">
+    <h2 style="text-align:center; color:#2d3e50;">All Customer Orders</h2>
+
+    <!-- Order status filters -->
+    <div class="order-filter-nav">
+        <a href="{{ url_for('admin_view_orders') }}"{% if not request.args.get('status') %} class="active"{% endif %}>All Orders</a>
+        <a href="{{ url_for('admin_view_orders', status='pending') }}"{% if request.args.get('status') == 'pending' %} class="active"{% endif %}>Pending Orders</a>
+        <a href="{{ url_for('admin_view_orders', status='delivered') }}"{% if request.args.get('status') == 'delivered' %} class="active"{% endif %}>Delivered Orders</a>
+    </div>
+
+    {% if orders %}
+    <table class="orders-table">
+        <thead>
+            <tr>
+                <th>Order ID</th>
+                <th>Customer</th> 
+                <th>View Details</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for order in orders %}
+            <tr>
+                <td>{{ order.order_id }}</td>
+                <td>
+                    <strong>{{ order.user_fullname }}</strong><br>
+                    <small>{{ order.user_username }}</small>
+                </td>
+                <td>
+                    <a href="{{ url_for('admin_order_detail', order_id=order.order_id) }}">
+                        <button type="button" class="view-details-btn">View Details</button>
+                    </a>
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="4" style="text-align:center; color:#666;">No orders found.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p style="text-align:center; color:#666; margin-top: 30px;">No orders found.</p>
+    {% endif %}
+</div>
+
+{% endblock %}

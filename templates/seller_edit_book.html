@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block content %}
+<style>
+    .cancel-button {
+        background: #999;
+        color: white;
+        padding: 10px 28px;
+        border: none;
+        border-radius: 6px;
+        font-size: 16px;
+        font-weight: bold;
+        cursor: pointer;
+        margin-left: 10px;
+        text-decoration: none;
+        display: inline-block;
+        line-height: normal;
+    }
+</style>
+
+<div style="max-width: 600px; margin: 40px auto; background: #fff; padding: 30px; border-radius: 12px; box-shadow: 0 2px 12px rgba(0,0,0,0.1);">
+    <h2>Edit Book</h2>
+
+<form method="POST" enctype="multipart/form-data">
+    <label for="thumbnail"><strong>Thumbnail:</strong></label><br>
+    {% if book.thumbnail_url %}
+        <img src="{{ book.thumbnail_url }}" alt="Thumbnail" style="width:80px; height:100px; object-fit:cover; margin-bottom: 12px;"><br>
+    {% else %}
+        <span style="color:#999; font-style: italic;">No image available</span><br><br>
+    {% endif %}
+    <input type="file" name="thumbnail" accept="image/*" style="margin-bottom:14px;"><br>
+        <label for="title"><strong>Book Title:</strong></label><br>
+        <input type="text" id="title" name="title" value="{{ book.title }}" required style="width:100%; padding:8px; margin-bottom: 16px;"><br>
+
+        <label for="author"><strong>Author:</strong></label><br>
+        <input type="text" id="author" name="author" value="{{ book.author }}" required style="width:100%; padding:8px; margin-bottom: 16px;"><br>
+
+        <label for="categories"><strong>Categories:</strong></label><br>
+        <input type="text" id="categories" name="categories" value="{{ categories_str }}"
+               placeholder="Comma separated categories" style="width:100%; padding:8px; margin-bottom: 16px;"><br>
+
+        <label for="price"><strong>Price:</strong></label><br>
+        <input type="number" id="price" name="price" value="{{ book.price }}" step="0.01" min="0" required style="width:100%; padding:8px; margin-bottom: 16px;"><br>
+
+        <label><strong>In Stock:</strong> {{ book.in_stock }}</label><br>
+
+        <label for="increment_stock" style="margin-top: 8px;">Add to stock:</label>
+        <input type="number" id="increment_stock" name="increment_stock" value="0" min="0" style="width:80px; padding:5px;">
+
+        <br><br>
+
+        <button type="submit" style="background:#1976d2; color:#fff; padding:12px 24px; border:none; border-radius:6px; font-size:16px; cursor:pointer;">
+            Save Changes
+        </button>
+        <a href="{{ url_for('seller_manage') }}" class="cancel-button">Cancel</a>
+    </form>
+</div>
+
+{% endblock %}

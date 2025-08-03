@@ -2,7 +2,7 @@
 {% block content %}
 
 <div style="max-width: 500px; margin: 40px auto; background: #fff; padding: 36px 32px; border-radius: 12px; box-shadow: 0 2px 16px #e3e3e3;">
-    <h2 style="color:#1976d2; text-align:center;">Review Seller Application</h2>
+    <h2 style="color:#1976d2; text-align:center;">Review Author Application</h2>
     <div style="margin-bottom:16px;">
         <strong>Full Name:</strong> {{ user['first_name'] }} {{ user['last_name'] }}<br>
         <strong>Email:</strong> {{ user['email'] }}<br>
@@ -10,30 +10,23 @@
         <strong>About:</strong> {{ user.get('about', '') }}
     </div>
 
-    <form method="POST" action="{{ url_for('admin_approve_seller', user_id=user['_id']) }}" style="margin-bottom:24px;">
-        <label for="username" style="font-weight:bold;">Set Seller Username:</label><br>
+    <form method="POST" action="{{ url_for('admin_approve_author', user_id=user['_id']) }}" style="margin-bottom:24px;">
+        <label for="username" style="font-weight:bold;">Set Author Username:</label><br>
         <input type="text" name="username" id="username" required style="width:100%;padding:8px;margin-bottom:12px;">
         <button type="submit" name="action" value="approve" style="background:#43a047; color:#fff; padding:10px 28px; border:none; border-radius:6px; font-size:16px; font-weight:bold; cursor:pointer;">
             SUBMIT APPROVAL
         </button>
     </form>
 
-    <form method="POST" action="{{ url_for('admin_approve_seller', user_id=user['_id']) }}">
+    <form method="POST" action="{{ url_for('admin_approve_author', user_id=user['_id']) }}">
         <label for="reason" style="font-weight:bold;">Reason for Disapproval:</label><br>
         <textarea name="reason" id="reason" required style="width:100%;padding:8px;margin-bottom:12px;"></textarea>
         <button type="submit" name="action" value="disapprove" style="background:#b71c1c; color:#fff; padding:10px 28px; border:none; border-radius:6px; font-size:16px; font-weight:bold; cursor:pointer;">
             SUBMIT DISAPPROVAL
         </button>
     </form>
-
-</div>
-
-<div style="text-align: center;">
-    <a href="{{ url_for('admin_dashboard') }}"
-        style="background:#888; color:#fff; padding:10px 28px; border:none;
-            border-radius:6px; font-size:16px; font-weight:bold; text-decoration:none;">
-        CANCEL
-    </a>
 </div>
 
 {% endblock %}
+
+

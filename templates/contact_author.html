@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+
+{% block content %}
+<style>
+    .becomeAuthor {
+        max-width: 600px; 
+        margin: 40px auto; 
+        background: #fff; 
+        padding: 36px 32px; 
+        border-radius: 12px; 
+        box-shadow: 0 2px 16px #e3e3e3;
+    }
+    
+    p{
+        font-size: 18px; 
+        color: #333;
+    }
+    h1{
+        font-weight: bold; 
+        text-shadow:#1976d2 1px 1px 5px;
+        text-align:center; 
+        color:#1e015e; 
+        margin-bottom: 20px;
+    }
+    h2{ 
+        color:#1976d2; 
+        margin-top: 32px;
+        }
+</style>
+    
+{% if error %}
+    <div style="color: red; margin-bottom: 16px; font-weight: bold;">
+        {{ error }}
+    </div>
+{% endif %}
+
+<div class="becomeAuthor">
+    <h1>Are you an Author?</h1>
+    <p>
+        Then you have just landed on the right space! Shelfspace will help you connect with readers who are looking for your great books! 
+        <br><br>
+        Just fill out the form below. Your account will be reviewed by our team, and you will be notified using the email address you input here once you are approved.
+    </p>
+    <form method="POST" action="{{ url_for('contact_author') }}">
+        <label for="name" style="font-weight:bold;">Full Name</label><br>
+        <input type="text" id="name" name="name" required style="width:100%; padding:10px; margin-bottom:16px; border-radius:6px; border:1px solid #ccc;"><br>
+        
+        <label for="email" style="font-weight:bold;">Email Address</label><br>
+        <input type="email" id="email" name="email" required style="width:100%; padding:10px; margin-bottom:16px; border-radius:6px; border:1px solid #ccc;"><br>
+
+        <label for="birth_month" style="font-weight:bold;">Birthdate (Month and Year only)</label><br>
+        <div style="display: flex; gap: 10px; margin-bottom: 16px;">
+            <select id="birth_month" name="birth_month" required style="flex:1; padding:10px; border-radius:6px; border:1px solid #ccc;">
+                <option value="" disabled selected>Month</option>
+                <option value="January">January</option>
+                <option value="February">February</option>
+                <option value="March">March</option>
+                <option value="April">April</option>
+                <option value="May">May</option>
+                <option value="June">June</option>
+                <option value="July">July</option>
+                <option value="August">August</option>
+                <option value="September">September</option>
+                <option value="October">October</option>
+                <option value="November">November</option>
+                <option value="December">December</option>
+            </select>
+            <select id="birth_year" name="birth_year" required style="flex:1; padding:10px; border-radius:6px; border:1px solid #ccc;">
+                <option value="" disabled selected>Year</option>
+                {% for year in range(1940, 2025) %}
+                    <option value="{{ year }}">{{ year }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        
+        <label for="message" style="font-weight:bold;">Tell us about the book(s) you want to sell</label><br>
+        <textarea id="message" name="message" rows="3" required style="width:100%; padding:10px; margin-bottom:18px; border-radius:6px; border:1px solid #ccc;"></textarea><br>
+        
+        <button type="submit" style="background:#43a047; color:#fff; padding:12px 32px; border:none; border-radius:6px; font-size:16px; font-weight:bold; cursor:pointer;">
+            Submit Author Application
+        </button>
+    </form>
+    <p style="color:#888; font-size:14px; margin-top:16px;">
+        Once approved, you will be able to list your books for sale and manage your inventory.
+    </p>
+</div>
+{% endblock %}

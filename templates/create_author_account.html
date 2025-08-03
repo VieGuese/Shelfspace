@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block content %}
+<div style="max-width: 500px; margin: 40px auto; background: #fff; padding: 36px 32px; border-radius: 12px; box-shadow: 0 2px 16px #e3e3e3;">
+    <h2 style="color:#1976d2;">Create Author Account</h2>
+    <form method="POST">
+        <label>Full Name</label>
+        <input type="text" value="{{ user['first_name'] }} {{ user['last_name'] }}" readonly style="width:100%;padding:8px;margin-bottom:14px;">
+        <label>Email Address</label>
+        <input type="email" value="{{ user['email'] }}" readonly style="width:100%;padding:8px;margin-bottom:14px;">
+        <button type="submit" style="background:#1976d2; color:#fff; padding:10px 20px; border:none; border-radius:5px; font-size:16px;">
+            Generate Author User Account
+        </button>
+    </form>
+</div>
+{% endblock %}

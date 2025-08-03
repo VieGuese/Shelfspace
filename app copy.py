@@ -23,6 +23,7 @@ users_collection = db["users"]
 books_collection = db["books"]
 deleted_users_collection = db["deleted_users"]
 
+
 @app.route('/')
 def index():
     return render_template('index.html')
@@ -66,6 +67,7 @@ def login():
             error = "Invalid username or password."
 
     return render_template('login.html', error=error)
+
 
 
 @app.route('/logout')
@@ -132,6 +134,7 @@ def admin_dashboard():
     
     users = list(users_collection.find(query))
     return render_template('admin_dashboard.html', users=users, filter_role=filter_role, search_query=search_query)
+
 
 @app.route('/admin/user/<user_id>')
 def admin_view_user(user_id):
@@ -225,6 +228,7 @@ def create_seller_account(user_id):
 
     return render_template('create_seller_account.html', user=user)
 
+
 @app.route('/admin/delete_user/<user_id>', methods=['POST'])
 def delete_user(user_id):
     if session.get('role') != 'admin':
@@ -253,6 +257,7 @@ def delete_user(user_id):
 
     flash("User deleted and archived.", "success")
     return redirect(url_for('admin_dashboard'))
+
 
 
 @app.route('/admin/approve_seller/<user_id>', methods=['GET', 'POST'])
@@ -325,6 +330,7 @@ def admin_approve_seller(user_id):
     # GET request: render the approval page
     return render_template('admin_approve_seller.html', user=user)
 
+
 from flask import Flask, render_template, request, redirect, url_for, session, flash
 from bson.objectid import ObjectId
 
@@ -382,6 +388,7 @@ def admin_content_management():
         tab=tab
     )
 
+
 @app.route('/admin/content/<content_type>/<item_id>')
 def admin_content_view_detail(content_type, item_id):
     if session.get('role') != 'admin':
@@ -434,6 +441,7 @@ def admin_content_view_detail(content_type, item_id):
         flash("Invalid content type.", "danger")
         return redirect(url_for('admin_content_management'))
 
+
 # Keep the action routes from before (approve/reject for books, ok/delete for reviews)
 @app.route('/admin/content/book/<item_id>/<action>', methods=['POST'])
 def admin_content_book_action(item_id, action):
@@ -456,6 +464,7 @@ def admin_content_book_action(item_id, action):
         flash("Invalid action.", "danger")
 
     return redirect(url_for('admin_content_view_detail', content_type='book', item_id=item_id))
+
 
 @app.route('/admin/content/review/<item_id>/<action>', methods=['POST'])
 def admin_content_review_action(item_id, action):
@@ -483,6 +492,7 @@ def admin_content_review_action(item_id, action):
         flash("Invalid action.", "danger")
 
     return redirect(url_for('admin_content_view_detail', content_type='review', item_id=item_id))
+
 
 
 
@@ -551,6 +561,7 @@ def seller_manage_orders():
     return render_template('seller_manage_orders.html', orders=seller_orders)
 
 
+
 @app.route('/seller/order/process/<order_id>', methods=['POST'])
 def process_order(order_id):
     if 'user_id' not in session or session.get('role') != 'seller':
@@ -562,6 +573,7 @@ def process_order(order_id):
 
     flash('Order processed successfully.', 'success')
     return redirect(url_for('seller_manage_orders'))
+
 
 @app.route('/admin/orders')
 def admin_view_orders():
@@ -595,6 +607,7 @@ def admin_view_orders():
         })
 
     return render_template('admin_orders.html', orders=enriched_orders)
+
 
 @app.route('/admin/order/<order_id>')
 def admin_order_detail(order_id):
@@ -635,6 +648,7 @@ def admin_order_detail(order_id):
 
 
 
+
 from bson.objectid import ObjectId
 
 @app.context_processor
@@ -648,6 +662,7 @@ def inject_unread_count():
         count = db.messages.count_documents({"to_user_id": user_oid, "read": False})
         return {'unread_count': count}
     return {'unread_count': 0}
+
 
 
 @app.route('/home', methods=['GET', 'POST'])
@@ -683,6 +698,7 @@ def home():
     )
 
 
+
 @app.route('/add_to_wishlist/<book_id>', methods=['POST'])
 def add_to_wishlist(book_id):
     # Make sure user is logged in
@@ -710,6 +726,7 @@ def add_to_wishlist(book_id):
 
     # Redirect back to home page
     return redirect(url_for('home'))
+
 
 @app.route('/about')
 def about():
@@ -763,6 +780,7 @@ def contact_seller():
 
     return render_template('contact_seller.html', error=error)
 
+
 @app.route('/seller/dashboard')
 def seller_dashboard():
     if 'user_id' not in session or session.get('role') != 'seller':
@@ -784,6 +802,7 @@ def seller_dashboard():
     return render_template('seller_dashboard.html', new_orders_count=new_orders_count)
 
 
+
 @app.route('/seller/manage')
 def seller_manage():
     if 'user_id' not in session or session.get('role') != 'seller':
@@ -795,6 +814,7 @@ def seller_manage():
     books = list(books_collection.find({'seller_id': seller_id}))
 
     return render_template('seller_manage.html', books=books, role=session.get('role'))
+
 
 
 
@@ -876,6 +896,7 @@ def add_book():
 
     # GET request
     return render_template('add_book.html')
+
 
 
 
@@ -986,6 +1007,7 @@ def edit_book(book_id):
 
 
 
+
 @app.route('/contact/author', methods=['GET', 'POST'])
 def contact_author():
     message = None
@@ -1029,6 +1051,7 @@ def contact_author():
                 return render_template('contact_author_thankyou.html', name=first_name)
 
     return render_template('contact_author.html', error=error)
+
 
 @app.route('/admin/approve_author/<user_id>', methods=['GET', 'POST'])
 def admin_approve_author(user_id):
@@ -1101,6 +1124,7 @@ def admin_approve_author(user_id):
     return render_template('admin_approve_author.html', user=user)
 
 
+
 @app.route('/returns')
 def returns():
     return render_template('returns.html')
@@ -1116,6 +1140,7 @@ def privacy():
 @app.route('/faqs')
 def faqs():
     return render_template('faqs.html')
+
 
 from flask import request, redirect, url_for, session, flash, render_template
 from bson.objectid import ObjectId
@@ -1239,22 +1264,16 @@ def process_cart_order():
         flash("Invalid action.", "danger")
         return redirect(url_for('view_cart'))
 
-
-from flask import request, redirect, url_for, session, flash, render_template
+from flask import (
+    request, render_template, redirect, url_for,
+    session, flash
+)
 from bson.objectid import ObjectId
 from datetime import datetime
-import os
-from werkzeug.utils import secure_filename
-
-ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'pdf'}
-UPLOAD_FOLDER = 'static/uploads'
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-
-def allowed_file(filename):
-    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 @app.route('/seller/message/<order_id>/<buyer_id>', methods=['GET', 'POST'])
 def seller_message(order_id, buyer_id):
+    # Check if logged in and seller role
     if 'user_id' not in session or session.get('role') != 'seller':
         return redirect(url_for('login'))
 
@@ -1269,18 +1288,20 @@ def seller_message(order_id, buyer_id):
         flash("Invalid IDs provided.", "danger")
         return redirect(url_for('seller_manage_orders'))
 
+    # Lookup buyer user
     buyer = users_collection.find_one({'_id': buyer_oid})
     if not buyer:
         flash("Buyer not found.", "danger")
         return redirect(url_for('seller_manage_orders'))
 
+    # Lookup order
     order = db['orders'].find_one({'_id': order_oid})
     if not order:
         flash("Order not found.", "danger")
         return redirect(url_for('seller_manage_orders'))
 
-    # Prepare book title if needed
-    book_title = None
+    # Optional: Get the book title according to this seller's book in the order
+    book_title = "the book"
     for item in order.get('books', []):
         if str(item.get('seller_id')) == seller_id:
             book = books_collection.find_one({'_id': ObjectId(item['book_id'])}) if item.get('book_id') else None
@@ -1289,74 +1310,44 @@ def seller_message(order_id, buyer_id):
                 break
 
     if request.method == 'POST':
-        action = request.form.get('action')
-
-        if action == 'send':
-            # Existing sending message logic
-            message_body = request.form.get('message', '').strip()
-            if not message_body:
-                flash("Message cannot be empty.", "danger")
-                return render_template(
-                    'seller_reply_message.html',
-                    buyer_email=buyer.get('email', ''),
-                    buyer_name=f"{buyer.get('first_name', '')} {buyer.get('last_name', '')}",
-                    book_title=book_title,
-                    request=request
-                )
-
-            files = request.files.getlist('attachments') if 'attachments' in request.files else []
-            attachment_urls = []
-            save_dir = os.path.join(app.root_path, app.config['UPLOAD_FOLDER'])
-            os.makedirs(save_dir, exist_ok=True)
-
-            for file in files:
-                if file and file.filename != '' and allowed_file(file.filename):
-                    filename = secure_filename(file.filename)
-                    timestamp = int(datetime.utcnow().timestamp())
-                    filename = f"{seller_id}_{timestamp}_{filename}"
-                    filepath = os.path.join(save_dir, filename)
-                    file.save(filepath)
-                    url = url_for('static', filename=f'uploads/{filename}')
-                    attachment_urls.append(url)
-
-            message_doc = {
-                "from_user_id": seller_oid,
-                "to_user_id": buyer_oid,
-                "order_id": order_oid,
-                "message": message_body,
-                "timestamp": datetime.utcnow(),
-                "read": False,
-                "attachments": attachment_urls
-            }
-
-            db.messages.insert_one(message_doc)
-            flash("Your message has been sent to the buyer.", "success")
-            return redirect(url_for('seller_manage_orders'))
-
-        elif action == 'show_process':
-            # Render the seller_process_order.html template with required data
-            # Optionally, you can pass the original buyer message if you want to show it in the form
-            last_message = db.messages.find_one(
-                {"order_id": order_oid, "from_user_id": buyer_oid, "to_user_id": seller_oid},
-                sort=[("timestamp", -1)]
-            )
-            customer_message = last_message['message'] if last_message else ''
-
-            buyer_name = f"{buyer.get('first_name', '')} {buyer.get('last_name', '')}"
-
+        message_body = request.form.get('message', '').strip()
+        if not message_body:
+            flash("Message cannot be empty.", "danger")
             return render_template(
-                'seller_process_order.html',
-                order_id=order_id,
-                buyer_id=buyer_id,
-                buyer_name=buyer_name,
-                customer_message=customer_message
+                'seller_reply_message.html',
+                buyer_email=buyer.get('email', ''),
+                buyer_name=f"{buyer.get('first_name', '')} {buyer.get('last_name', '')}",
+                book_title=book_title,
+                request=request
             )
 
-        else:
-            flash("Invalid action.", "danger")
-            return redirect(url_for('seller_manage_orders'))
+        # Create message document
+        message_doc = {
+            "from_user_id": seller_oid,
+            "to_user_id": buyer_oid,
+            "order_id": order_oid,
+            "message": message_body,
+            "timestamp": datetime.utcnow(),
+            "read": False,
+            "attachments": []
+        }
 
-    # GET request: render the message form
+        try:
+            db.messages.insert_one(message_doc)
+        except Exception as e:
+            flash(f"An error occurred saving the message: {e}", "danger")
+            return render_template(
+                'seller_reply_message.html',
+                buyer_email=buyer.get('email', ''),
+                buyer_name=f"{buyer.get('first_name', '')} {buyer.get('last_name', '')}",
+                book_title=book_title,
+                request=request
+            )
+
+        flash("Your message has been sent to the buyer.", "success")
+        return redirect(url_for('seller_manage_orders'))
+
+    # GET request: render the send message form pre-filled with buyer info
     return render_template(
         'seller_reply_message.html',
         buyer_email=buyer.get('email', ''),
@@ -1364,11 +1355,6 @@ def seller_message(order_id, buyer_id):
         book_title=book_title,
         request=request
     )
-
-
-
-
-
 
 
 from flask import session, redirect, url_for, flash, render_template
@@ -1416,6 +1402,7 @@ def seller_messages():
 
 
 
+
 from flask import render_template, redirect, url_for, session, flash
 from bson.objectid import ObjectId
 
@@ -1456,6 +1443,7 @@ def view_seller_message(message_id):
 
 
 
+
 @app.route('/seller/messages/delete/<message_id>', methods=['POST'])
 def delete_seller_message(message_id):
     if 'user_id' not in session or session.get('role') != 'seller':
@@ -1470,6 +1458,7 @@ def delete_seller_message(message_id):
         flash("Message not found or you cannot delete it.", "danger")
 
     return redirect(url_for('seller_messages'))
+
 
 @app.route('/customer/messages')
 def customer_messages():
@@ -1498,6 +1487,7 @@ def customer_messages():
 
 
 
+
 from flask import request, redirect, url_for, session, flash, render_template
 from bson.objectid import ObjectId
 from datetime import datetime
@@ -1506,7 +1496,9 @@ from datetime import datetime
 def customer_reply_message(message_id):
     if 'user_id' not in session or session.get('role') != 'customer':
         return redirect(url_for('login'))
+
     user_oid = ObjectId(session['user_id'])
+
     try:
         msg_oid = ObjectId(message_id)
     except Exception:
@@ -1518,30 +1510,14 @@ def customer_reply_message(message_id):
         flash("Message not found or unauthorized.", "danger")
         return redirect(url_for('customer_messages'))
 
-    seller_oid = orig_msg.get('from_user_id')
-    if not isinstance(seller_oid, ObjectId):
-        seller_oid = ObjectId(seller_oid)
+    # Ensure seller_oid is ObjectId to prevent mismatches
+    seller_oid = ObjectId(orig_msg.get('from_user_id'))
 
     if request.method == 'POST':
-        reply_text = request.form.get('reply_text', '').strip()
+        reply_text = request.form.get('message', '').strip()
         if not reply_text:
             flash("Message cannot be empty", "danger")
             return render_template('customer_reply_message.html', original_message=orig_msg)
-
-        files = request.files.getlist('attachments')
-        attachment_urls = []
-
-        save_dir = os.path.join(app.root_path, app.config['UPLOAD_FOLDER'])
-        os.makedirs(save_dir, exist_ok=True)
-
-        for file in files:
-            if file and file.filename and allowed_file(file.filename):
-                filename = secure_filename(file.filename)
-                timestamp = int(datetime.utcnow().timestamp())
-                filename = f"{session['user_id']}_{timestamp}_{filename}"
-                file.save(os.path.join(save_dir, filename))
-                url = url_for('static', filename=f'uploads/{filename}')
-                attachment_urls.append(url)
 
         reply_doc = {
             "from_user_id": user_oid,
@@ -1550,7 +1526,7 @@ def customer_reply_message(message_id):
             "message": reply_text,
             "timestamp": datetime.utcnow(),
             "read": False,
-            "attachments": attachment_urls,
+            "attachments": [],  # adapt if you add file uploads here
             "in_reply_to": orig_msg['_id']
         }
         db.messages.insert_one(reply_doc)
@@ -1591,6 +1567,7 @@ def view_message(message_id):
 
 
 
+
 @app.route('/customer/messages/delete/<message_id>', methods=['POST'])
 def delete_message(message_id):
     if 'user_id' not in session or session.get('role') != 'customer':
@@ -1605,6 +1582,7 @@ def delete_message(message_id):
         flash("Message not found or you cannot delete it.", "danger")
 
     return redirect(url_for('customer_messages'))
+
 
 
 
@@ -1634,6 +1612,7 @@ def delete_book(book_id):
 
 
 
+
 @app.route('/seller/conversation/<order_id>/<buyer_id>')
 def seller_conversation(order_id, buyer_id):
     if 'user_id' not in session or session.get('role') != 'seller':
@@ -1653,6 +1632,7 @@ def seller_conversation(order_id, buyer_id):
     # You can enrich messages here as needed
 
     return render_template('seller_conversation.html', messages=messages, order_id=order_id, buyer_id=buyer_id)
+
 
 
 import os

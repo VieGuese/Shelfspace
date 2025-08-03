@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div style="max-width: 700px; margin: 40px auto; background: #fff; padding: 30px; border-radius: 12px; box-shadow: 0 2px 12px rgba(0,0,0,0.1);">
+
+    <h2>Message Detail</h2>
+
+    <p><strong>From:</strong> {{ buyer_name }} ({{ buyer_email }})</p>
+    <p><strong>Order ID:</strong> {{ message.order_id }}</p>
+
+    <p><strong>Message:</strong></p>
+    <div style="border: 1px solid #ddd; padding: 15px; border-radius: 8px; background-color: #f9f9f9;">
+        {{ message.message | replace('\n', '<br>') | safe }}
+    </div>
+
+    {% if message.attachments %}
+        <p><strong>Attachments:</strong></p>
+        <ul>
+            {% for file_url in message.attachments %}
+                <li><a href="{{ file_url }}" target="_blank">View Attachment</a></li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+
+    <div style="margin-top: 30px;">
+        <a href="{{ url_for('seller_message', order_id=message.order_id, buyer_id=buyer_id) }}">
+            <button type="button" style="margin-right: 15px;">Reply</button>
+        </a>
+
+        <form action="{{ url_for('delete_seller_message', message_id=message._id) }}" method="POST" style="display:inline;">
+            <button type="submit" onclick="return confirm('Are you sure you want to delete this message?');">Delete</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+{% block content %}
+
+<style>
+    table {
+        table-layout:fixed;  /* Fix column widths */
+        width: 100%;
+    }
+
+    th, td {
+        word-wrap: break-word;
+        max-width: 200px;    /* Adjust as needed */
+        padding: 8px;
+        border: 1px solid #ccc;
+    } 
+
+    .action-button {
+    width: 100%;
+    padding: 10px;
+    font-size: 14px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    }
+
+    .contact-button {
+        background-color: #1976d2;
+        color: white;
+        margin-bottom: 6px;
+    }
+
+    .contact-button:disabled {
+        background-color: #ccc;
+        cursor: not-allowed;
+    }
+
+    .process-button {
+        background-color: #4caf50;
+        color: white;
+    }
+</style>
+<div style="max-width: 1000px; margin: 40px auto; background: #fff; padding: 30px; border-radius: 12px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.1);">
+    <h2>Manage Orders</h2>
+
+    <form method="GET" action="{{ url_for('seller_manage_orders') }}" style="margin-bottom: 20px; display: flex; gap: 10px;">
+        <input
+            type="text"
+            name="search"
+            placeholder="Type Order ID or Book Title"
+            value="{{ request.args.get('search', '') }}"
+            style="flex-grow: 1; padding: 10px; font-size: 16px; border: 1px solid #ccc; border-radius: 6px;"
+        />
+        <button
+            type="submit"
+            style="background: #1976d2; color: white; padding: 10px 20px; font-size: 16px; border: none; border-radius: 6px; cursor: pointer;"
+        >
+            SEARCH
+        </button>
+    </form>
+
+    <div style="overflow-x: auto;">
+        <table style="width: 100%; border-collapse: collapse;">
+            <!-- your table head and tbody here -->
+        </table>
+    </div>
+
+
+    {% if orders %}
+    <table style="width: 100%; border-collapse: collapse; text-align: left;">
+        <thead>
+            <tr style="background-color: #78afe7; color: white;">
+                <th style="padding: 12px; border: 1px solid #ccc;">ORDER ID</th>
+                <th style="padding: 12px; border: 1px solid #ccc;">CUSTOMER</th>
+                <th style="padding: 12px; border: 1px solid #ccc;">BOOK</th>
+                <th style="padding: 12px; border: 1px solid #ccc;">IN STOCK</th>
+                <th style="padding: 12px; border: 1px solid #ccc;">PRICE</th>
+                <th style="padding: 12px; border: 1px solid #ccc;">ORDERED AT</th>
+                <th style="padding: 12px; border: 1px solid #ccc;">ACTION</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for order in orders %}
+            <tr>
+                <td style="padding: 12px; border: 1px solid #ccc;">{{ order.order_id }}</td>
+                <td style="padding: 12px; border: 1px solid #ccc;">{{ order.user_fullname }}</td>
+                <td style="padding: 12px; border: 1px solid #ccc;">{{ order.book_title }}</td>
+                <td style="padding: 12px; border: 1px solid #ccc;">{{ order.in_stock }}</td>
+                <td style="padding: 12px; border: 1px solid #ccc;">${{ "%.2f"|format(order.price) }}</td>
+                <td style="padding: 12px; border: 1px solid #ccc;">{{ order.ordered_at }}</td>
+                    <td style="padding: 12px; border: 1px solid #ccc;">
+                        {% if order.user_email and order.user_id %}
+                            <form method="GET" action="{{ url_for('seller_message', order_id=order.order_id, buyer_id=order.user_id) }}" style="margin-bottom: 6px;">
+                                <button type="submit" class="action-button contact-button">CONTACT BUYER</button>
+                            </form>
+                        {% else %}
+                            <button type="button" class="action-button contact-button" disabled>CONTACT BUYER</button>
+                        {% endif %}
+                        <form method="POST" action="{{ url_for('process_order', order_id=order.order_id) }}" style="margin: 0;">
+                            <button type="submit" class="action-button process-button">PROCESS ORDER</button>
+                        </form>
+                    </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p>No orders found.</p>
+    {% endif %}
+
+</div>
+{% endblock %}

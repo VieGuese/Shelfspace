@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+{% block content %}
+
+<style>
+    .datagrid { width: 100%; border-collapse: collapse; margin-top: 24px;}
+    .datagrid th, .datagrid td { padding: 12px 10px; border-bottom: 1px solid #efefef; vertical-align: middle; text-align: left;}
+    .datagrid th { background: #f8f9fa;}
+    .datagrid td img { width: 64px; height: 64px; object-fit: cover; border-radius: 6px; margin-right: 10px; vertical-align: middle;}
+    .content-title { font-weight: bold; font-size: 17px; vertical-align: middle;}
+    .action-btn { padding: 7px 20px; border: none; border-radius: 5px; font-weight: 600; font-size: 15px; cursor: pointer; }
+    .view-details-btn { background: #1976d2; color: #fff; }
+    .tabbar { text-align: center; margin-bottom: 20px; }
+    .tab-btn { padding: 9px 22px; border: none; border-radius: 5px; margin:0 12px; font-size: 16px; font-weight: 500; background: #dadada; color:#2d3e50; cursor:pointer;}
+    .tab-btn.selected { background: #150255; color: #fff; box-shadow: 0 4px 16px #c3c3ea;}
+    .logout-btn { float: right; margin-top: -46px; background: #e53935; color: #fff; border: none; padding: 8px 22px; border-radius: 6px; font-size: 15px; cursor:pointer; }
+</style>
+
+<div style="max-width:1120px; margin:40px auto; background:rgba(255,255,255,0.97); padding:28px 26px; border-radius:12px;">
+
+    <h2 style="text-align:center; color:#2d3e50;">Manage Users</h2>
+
+    <form action="{{ url_for('logout') }}" method="get" style="margin-bottom:10px;">
+        <button type="submit" class="logout-btn">Logout</button>
+    </form>
+
+    <div class="tabbar">
+        <a href="{{ url_for('admin_content_management', tab='books') }}">
+            <button class="tab-btn{% if tab == 'books' %} selected{% endif %}">BOOKS</button>
+        </a>
+        <a href="{{ url_for('admin_content_management', tab='reviews') }}">
+            <button class="tab-btn{% if tab == 'reviews' %} selected{% endif %}">REVIEWS</button>
+        </a>
+    </div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        <ul style="list-style:none; padding:0;">
+        {% for category, message in messages %}
+            {% if category == 'success' %}
+            <li class="flash-success">{{ message }}</li>
+            {% elif category == 'danger' %}
+            <li class="flash-danger">{{ message }}</li>
+            {% else %}
+            <li class="flash-warning">{{ message }}</li>
+            {% endif %}
+        {% endfor %}
+        </ul>
+    {% endif %}
+    {% endwith %}
+
+    <table class="datagrid">
+        <thead>
+            <tr>
+                <th>CONTENT</th>
+                <th>ACTION</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in datagrid_rows %}
+            <tr>
+                <td>
+                    {% if row.image %}
+                        <img src="{{ row.image }}" alt="content image">
+                    {% else %}
+                        <span style="display:inline-block;width:64px;height:64px;background:#edf0fa;border-radius:6px;margin-right:10px;"></span>
+                    {% endif %}
+                    <span class="content-title">{{ row.title }}</span>
+                </td>
+                <td>
+                    <a href="{{ url_for('admin_content_view_detail', content_type=row.type, item_id=row.id) }}">
+                        <button class="action-btn view-details-btn">VIEW DETAILS</button>
+                    </a>
+                    {% if row.status == 'pending' %}
+                        <span style="color: red; font-weight: bold; margin-left: 12px;">Pending Approval</span>
+                    {% endif %}
+                </td>
+
+            </tr>
+            {% else %}
+            <tr><td colspan="2" style="text-align:center; color:#888;">No content found for this filter.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+</div>
+
+{% endblock %}
